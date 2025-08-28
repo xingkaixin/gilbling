@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "聚源数据字典增强",
+  "version": "1.0",
+  "description": "为聚源数据字典添加字段类型颜色和唯一性标识",
+
+  "content_scripts": [
+    {
+      "matches": ["https://dd.gildata.com/*"],
+      "css": ["enhance.css"],
+      "js": ["enhance.js"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "permissions": ["activeTab"]
+}

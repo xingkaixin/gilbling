@@ -1,0 +1,107 @@
+/* MySQL字段类型颜色 - 整行效果 */
+.table-column.table-interval-bg tbody tr.field-type-int,
+.table-column.table-interval-bg tbody tr.field-type-bigint,
+.table-column.table-interval-bg tbody tr.field-type-tinyint,
+.table-column.table-interval-bg tbody tr.field-type-smallint,
+.table-column.table-interval-bg tbody tr.field-type-mediumint,
+.table-column.table-interval-bg tbody tr.field-type-decimal,
+.table-column.table-interval-bg tbody tr.field-type-numeric,
+.table-column.table-interval-bg tbody tr.field-type-float,
+.table-column.table-interval-bg tbody tr.field-type-double {
+  background-color: rgba(0, 0, 255, 0.12) !important; /* 数字类型 - 淡蓝色背景 */
+}
+
+.table-column.table-interval-bg tbody tr.field-type-varchar,
+.table-column.table-interval-bg tbody tr.field-type-char,
+.table-column.table-interval-bg tbody tr.field-type-text,
+.table-column.table-interval-bg tbody tr.field-type-tinytext,
+.table-column.table-interval-bg tbody tr.field-type-mediumtext,
+.table-column.table-interval-bg tbody tr.field-type-longtext {
+  background-color: rgba(0, 128, 0, 0.12) !important; /* 字符串类型 - 淡绿色背景 */
+}
+
+.table-column.table-interval-bg tbody tr.field-type-date,
+.table-column.table-interval-bg tbody tr.field-type-datetime,
+.table-column.table-interval-bg tbody tr.field-type-timestamp,
+.table-column.table-interval-bg tbody tr.field-type-time,
+.table-column.table-interval-bg tbody tr.field-type-year {
+  background-color: rgba(255, 140, 0, 0.12) !important; /* 日期时间类型 - 淡橙色背景 */
+}
+
+.table-column.table-interval-bg tbody tr.field-type-blob,
+.table-column.table-interval-bg tbody tr.field-type-tinyblob,
+.table-column.table-interval-bg tbody tr.field-type-mediumblob,
+.table-column.table-interval-bg tbody tr.field-type-longblob,
+.table-column.table-interval-bg tbody tr.field-type-binary,
+.table-column.table-interval-bg tbody tr.field-type-varbinary {
+  background-color: rgba(128, 0, 128, 0.12) !important; /* 二进制类型 - 淡紫色背景 */
+}
+
+.table-column.table-interval-bg tbody tr.field-type-bit,
+.table-column.table-interval-bg tbody tr.field-type-bool,
+.table-column.table-interval-bg tbody tr.field-type-boolean {
+  background-color: rgba(220, 20, 60, 0.12) !important; /* 布尔类型 - 淡红色背景 */
+}
+
+/* 业务主键加粗 */
+.table-column.table-interval-bg tbody tr.field-business-key {
+  font-weight: bold !important;
+  border-left: 3px solid #007acc !important;
+ /* background-color: rgba(0, 122, 204, 0.15) !important;  淡蓝色背景突出显示 */
+}
+
+/* 主键特殊标记 */
+.table-column.table-interval-bg tbody tr.field-primary-key {
+  font-weight: bold !important;
+  border-left: 3px solid #ff4444 !important;
+}
+
+/* 类型列文字颜色强化 */
+.table-column.table-interval-bg tbody tr.field-type-int td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-bigint td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-tinyint td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-smallint td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-mediumint td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-decimal td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-numeric td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-float td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-double td:nth-child(5) {
+  color: #0000FF !important;
+  font-weight: 600;
+}
+
+.table-column.table-interval-bg tbody tr.field-type-varchar td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-char td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-text td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-tinytext td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-mediumtext td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-longtext td:nth-child(5) {
+  color: #008000 !important;
+  font-weight: 600;
+}
+
+.table-column.table-interval-bg tbody tr.field-type-date td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-datetime td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-timestamp td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-time td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-year td:nth-child(5) {
+  color: #FF8C00 !important;
+  font-weight: 600;
+}
+
+.table-column.table-interval-bg tbody tr.field-type-blob td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-tinyblob td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-mediumblob td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-longblob td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-binary td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-varbinary td:nth-child(5) {
+  color: #800080 !important;
+  font-weight: 600;
+}
+
+.table-column.table-interval-bg tbody tr.field-type-bit td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-bool td:nth-child(5),
+.table-column.table-interval-bg tbody tr.field-type-boolean td:nth-child(5) {
+  color: #DC143C !important;
+  font-weight: 600;
+}
