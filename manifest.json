@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "聚源数据字典增强",
+  "name": "聚美美",
   "version": "1.0",
-  "description": "为聚源数据字典添加字段类型颜色和唯一性标识",
+  "description": "美化聚源数据字典",
 
   "content_scripts": [
     {
