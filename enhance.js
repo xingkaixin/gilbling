@@ -13,8 +13,100 @@
     return keysText.split(",").map((k) => k.trim());
   }
 
+  function addExportButton() {
+    if (document.querySelector('#table-export-btn')) return;
+
+    const table = document.querySelector('table');
+    if (!table) return;
+
+    const exportBtn = document.createElement('button');
+    exportBtn.id = 'table-export-btn';
+    exportBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-right: 6px; vertical-align: middle;">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+        <path d="m14,2 l6,6" stroke="currentColor" stroke-width="2"/>
+        <path d="m16,13 l-8,0" stroke="currentColor" stroke-width="2"/>
+        <path d="m16,17 l-8,0" stroke="currentColor" stroke-width="2"/>
+        <path d="m10,9 l-2,0" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      导出表格
+    `;
+    exportBtn.style.cssText = `
+      margin: 12px 0;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    `;
+    
+    exportBtn.addEventListener('mouseenter', () => {
+      exportBtn.style.transform = 'translateY(-2px)';
+      exportBtn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)';
+    });
+    
+    exportBtn.addEventListener('mouseleave', () => {
+      exportBtn.style.transform = 'translateY(0)';
+      exportBtn.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+    });
+    
+    exportBtn.addEventListener('mousedown', () => {
+      exportBtn.style.transform = 'translateY(0) scale(0.98)';
+    });
+    
+    exportBtn.addEventListener('mouseup', () => {
+      exportBtn.style.transform = 'translateY(-2px) scale(1)';
+    });
+
+    exportBtn.addEventListener('click', exportTableToClipboard);
+    table.parentNode.insertBefore(exportBtn, table);
+  }
+
+  function exportTableToClipboard() {
+    const rows = document.querySelectorAll('tr[ng-repeat="column in columns"]');
+    if (rows.length === 0) {
+      alert('没有找到表格数据');
+      return;
+    }
+
+    const headers = ['序号', '列名', '中文名称', '有值率(%)', '类型', '空否', '备注'];
+    let tsvData = headers.join('\t') + '\n';
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 6) {
+        const rowData = [
+          cells[0]?.textContent?.trim() || '',
+          cells[1]?.textContent?.trim() || '',
+          cells[2]?.textContent?.trim() || '',
+          cells[3]?.textContent?.trim() || '',
+          cells[4]?.textContent?.trim() || '',
+          cells[5]?.textContent?.trim() || '',
+          cells[6]?.textContent?.trim() || ''
+        ];
+        tsvData += rowData.join('\t') + '\n';
+      }
+    });
+
+    navigator.clipboard.writeText(tsvData).then(() => {
+      alert('表格数据已复制到剪贴板，可直接粘贴到Excel');
+    }).catch(() => {
+      alert('复制失败，请手动复制以下内容：\n\n' + tsvData);
+    });
+  }
+
   function enhanceTable() {
     const businessKeys = extractBusinessKeys();
+    addExportButton();
 
     document
       .querySelectorAll('tr[ng-repeat="column in columns"]')
