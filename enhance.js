@@ -1,8 +1,7 @@
-// 针对聚源数据字典的精确匹配 - 动态业务主键版
+// enhance.js - 修复版
 (function () {
   "use strict";
 
-  // 从页面动态提取业务唯一性字段
   function extractBusinessKeys() {
     const element = document.querySelector(
       "[ng-bind=\"index.columnName || '无'\"]"
@@ -18,9 +17,7 @@
     const businessKeys = extractBusinessKeys();
 
     document
-      .querySelectorAll(
-        'tr[ng-repeat="column in columns"], .table-column tbody tr'
-      )
+      .querySelectorAll('tr[ng-repeat="column in columns"]')
       .forEach((row) => {
         const cells = row.querySelectorAll("td");
         if (cells.length < 5) return;
@@ -46,16 +43,9 @@
       });
   }
 
-  // 延迟执行，确保Angular渲染完成
-  setTimeout(() => {
-    enhanceTable();
-  }, 500);
+  setTimeout(enhanceTable, 500);
 
-  // 监听Angular动态内容
-  const observer = new MutationObserver(() => {
-    enhanceTable();
-  });
-
+  const observer = new MutationObserver(enhanceTable);
   if (document.body) {
     observer.observe(document.body, { childList: true, subtree: true });
   } else {
@@ -64,9 +54,6 @@
     });
   }
 
-  // 每500ms检查一次新内容
   setInterval(enhanceTable, 500);
-
-  // 暴露到全局供调试
   window.debugEnhance = enhanceTable;
 })();
