@@ -3,7 +3,11 @@
   "name": "聚美美",
   "version": "1.0",
   "description": "美化聚源数据字典",
-
+  "icons": {
+    "16": "gilbling-log.png",
+    "48": "gilbling-log.png",
+    "128": "gilbling-log.png"
+  },
   "content_scripts": [
     {
       "matches": ["https://dd.gildata.com/*"],
