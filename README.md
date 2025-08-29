@@ -124,6 +124,7 @@ MIT协议 - 详见 [LICENSE](LICENSE) 文件。
 
 ### V1.0.1
 - 添加表格导出功能
+- 字段类型适配Oracle、SQLServer
 
 ### v1.0.0
 - 字段类型区分显示

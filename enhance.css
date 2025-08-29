@@ -7,6 +7,7 @@ tr.field-business-key {
 }
 
 /* 数字类型 - 蓝色 */
+/* MySQL */
 tr.field-type-int td,
 tr.field-type-bigint td,
 tr.field-type-tinyint td,
@@ -15,12 +16,30 @@ tr.field-type-mediumint td,
 tr.field-type-decimal td,
 tr.field-type-numeric td,
 tr.field-type-float td,
-tr.field-type-double td {
+tr.field-type-double td,
+/* Oracle */
+tr.field-type-number td,
+tr.field-type-integer td,
+tr.field-type-real td,
+tr.field-type-binary_float td,
+tr.field-type-binary_double td,
+/* SQL Server */
+tr.field-type-tinyint td,
+tr.field-type-smallint td,
+tr.field-type-int td,
+tr.field-type-bigint td,
+tr.field-type-decimal td,
+tr.field-type-numeric td,
+tr.field-type-smallmoney td,
+tr.field-type-money td,
+tr.field-type-float td,
+tr.field-type-real td {
   color: #0000FF !important;
   /* font-weight: 600 !important; */
 }
 
 /* 业务主键的数字类型 - 蓝色 + 加粗 */
+/* MySQL */
 tr.field-business-key.field-type-int td,
 tr.field-business-key.field-type-bigint td,
 tr.field-business-key.field-type-tinyint td,
@@ -29,68 +48,154 @@ tr.field-business-key.field-type-mediumint td,
 tr.field-business-key.field-type-decimal td,
 tr.field-business-key.field-type-numeric td,
 tr.field-business-key.field-type-float td,
-tr.field-business-key.field-type-double td {
+tr.field-business-key.field-type-double td,
+/* Oracle */
+tr.field-business-key.field-type-number td,
+tr.field-business-key.field-type-integer td,
+tr.field-business-key.field-type-real td,
+tr.field-business-key.field-type-binary_float td,
+tr.field-business-key.field-type-binary_double td,
+/* SQL Server */
+tr.field-business-key.field-type-tinyint td,
+tr.field-business-key.field-type-smallint td,
+tr.field-business-key.field-type-int td,
+tr.field-business-key.field-type-bigint td,
+tr.field-business-key.field-type-decimal td,
+tr.field-business-key.field-type-numeric td,
+tr.field-business-key.field-type-smallmoney td,
+tr.field-business-key.field-type-money td,
+tr.field-business-key.field-type-float td,
+tr.field-business-key.field-type-real td {
   color: #0000FF !important;
   /* font-weight: bold !important; */
 }
 
 /* 字符串类型 - 绿色 */
+/* MySQL */
 tr.field-type-varchar td,
 tr.field-type-char td,
 tr.field-type-text td,
 tr.field-type-tinytext td,
 tr.field-type-mediumtext td,
-tr.field-type-longtext td {
+tr.field-type-longtext td,
+/* Oracle */
+tr.field-type-varchar2 td,
+tr.field-type-nvarchar2 td,
+tr.field-type-char td,
+tr.field-type-nchar td,
+tr.field-type-clob td,
+tr.field-type-nclob td,
+tr.field-type-long td,
+/* SQL Server */
+tr.field-type-varchar td,
+tr.field-type-nvarchar td,
+tr.field-type-char td,
+tr.field-type-nchar td,
+tr.field-type-text td,
+tr.field-type-ntext td {
   color: #008000 !important;
   /* font-weight: 600 !important; */
 }
 
 /* 业务主键的字符串类型 - 绿色 + 加粗 */
+/* MySQL */
 tr.field-business-key.field-type-varchar td,
 tr.field-business-key.field-type-char td,
 tr.field-business-key.field-type-text td,
 tr.field-business-key.field-type-tinytext td,
 tr.field-business-key.field-type-mediumtext td,
-tr.field-business-key.field-type-longtext td {
+tr.field-business-key.field-type-longtext td,
+/* Oracle */
+tr.field-business-key.field-type-varchar2 td,
+tr.field-business-key.field-type-nvarchar2 td,
+tr.field-business-key.field-type-char td,
+tr.field-business-key.field-type-nchar td,
+tr.field-business-key.field-type-clob td,
+tr.field-business-key.field-type-nclob td,
+tr.field-business-key.field-type-long td,
+/* SQL Server */
+tr.field-business-key.field-type-varchar td,
+tr.field-business-key.field-type-nvarchar td,
+tr.field-business-key.field-type-char td,
+tr.field-business-key.field-type-nchar td,
+tr.field-business-key.field-type-text td,
+tr.field-business-key.field-type-ntext td {
   color: #008000 !important;
   /* font-weight: bold !important; */
 }
 
 /* 时间类型 - 橙色 */
+/* MySQL */
 tr.field-type-date td,
 tr.field-type-datetime td,
 tr.field-type-timestamp td,
 tr.field-type-time td,
-tr.field-type-year td {
+tr.field-type-year td,
+/* Oracle */
+tr.field-type-date td,
+tr.field-type-timestamp td,
+tr.field-type-interval td,
+/* SQL Server */
+tr.field-type-datetime td,
+tr.field-type-datetime2 td,
+tr.field-type-smalldatetime td,
+tr.field-type-date td,
+tr.field-type-time td,
+tr.field-type-datetimeoffset td {
   color: #FF8C00 !important;
   /* font-weight: 600 !important; */
 }
-/* 
 /* 业务主键的时间类型 - 橙色 + 加粗 */
+/* MySQL */
 tr.field-business-key.field-type-date td,
 tr.field-business-key.field-type-datetime td,
 tr.field-business-key.field-type-timestamp td,
 tr.field-business-key.field-type-time td,
-tr.field-business-key.field-type-year td {
+tr.field-business-key.field-type-year td,
+/* Oracle */
+tr.field-business-key.field-type-date td,
+tr.field-business-key.field-type-timestamp td,
+tr.field-business-key.field-type-interval td,
+/* SQL Server */
+tr.field-business-key.field-type-datetime td,
+tr.field-business-key.field-type-datetime2 td,
+tr.field-business-key.field-type-smalldatetime td,
+tr.field-business-key.field-type-date td,
+tr.field-business-key.field-type-time td,
+tr.field-business-key.field-type-datetimeoffset td {
   color: #FF8C00 !important;
   /* font-weight: bold !important; */
-} */
+}
 
 /* 二进制类型 - 紫色 */
+/* MySQL */
 tr.field-type-blob td,
 tr.field-type-tinyblob td,
 tr.field-type-mediumblob td,
 tr.field-type-longblob td,
 tr.field-type-binary td,
-tr.field-type-varbinary td {
+tr.field-type-varbinary td,
+/* Oracle */
+tr.field-type-blob td,
+tr.field-type-raw td,
+tr.field-type-long_raw td,
+tr.field-type-bfile td,
+/* SQL Server */
+tr.field-type-binary td,
+tr.field-type-varbinary td,
+tr.field-type-image td {
   color: #800080 !important;
   /* font-weight: 600 !important; */
 }
 
 /* 布尔类型 - 红色 */
+/* MySQL */
 tr.field-type-bit td,
 tr.field-type-bool td,
-tr.field-type-boolean td {
+tr.field-type-boolean td,
+/* Oracle (没有专门的布尔类型，通常用NUMBER(1)或CHAR(1)) */
+/* SQL Server */
+tr.field-type-bit td {
   color: #DC143C !important;
   /* font-weight: 600 !important; */
 }
