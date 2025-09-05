@@ -2,6 +2,29 @@
 (function () {
   "use strict";
 
+  // 字段类型映射表 - 消除200+行CSS硬编码选择器
+  const FIELD_TYPE_MAP = {
+    // 数字类型 - 蓝色
+    numeric: ['int', 'bigint', 'tinyint', 'smallint', 'mediumint', 'decimal', 'numeric', 'float', 'double', 'number', 'integer', 'real', 'binary_float', 'binary_double', 'smallmoney', 'money'],
+    // 字符串类型 - 绿色  
+    string: ['varchar', 'char', 'text', 'varchar2', 'nvarchar', 'nvarchar2', 'nchar', 'char2', 'long'],
+    // 时间类型 - 橙色
+    datetime: ['date', 'datetime', 'timestamp', 'time', 'datetime2', 'datetimeoffset', 'smalldatetime'],
+    // 二进制类型 - 紫色
+    binary: ['blob', 'binary', 'varbinary', 'raw', 'image'],
+    // 布尔类型 - 红色
+    boolean: ['bit', 'bool', 'boolean']
+  };
+
+  // 字段类型颜色映射
+  const FIELD_TYPE_COLORS = {
+    numeric: '#0000FF',
+    string: '#008000', 
+    datetime: '#FF8C00',
+    binary: '#800080',
+    boolean: '#DC143C'
+  };
+
   function extractBusinessKeys() {
     const element = document.querySelector(
       "[ng-bind=\"index.columnName || '无'\"]"
@@ -125,6 +148,44 @@
     copyToClipboard(tsvData);
   }
 
+  function getFieldTypeCategory(fieldType) {
+    const baseType = fieldType.split(/[\(\s]/)[0].toLowerCase();
+    for (const [category, types] of Object.entries(FIELD_TYPE_MAP)) {
+      if (types.includes(baseType)) {
+        return category;
+      }
+    }
+    return null;
+  }
+
+  function applyFieldStyling(row, fieldType, columnName, businessKeys) {
+    const cells = row.querySelectorAll("td");
+    if (cells.length < 5) return;
+
+    // 清理旧样式
+    cells.forEach(cell => {
+      cell.style.color = '';
+      cell.style.fontWeight = '';
+    });
+
+    // 应用字段类型颜色
+    const category = getFieldTypeCategory(fieldType);
+    if (category && FIELD_TYPE_COLORS[category]) {
+      cells.forEach(cell => {
+        cell.style.color = FIELD_TYPE_COLORS[category];
+      });
+    }
+
+    // 业务主键样式
+    if (businessKeys.includes(columnName)) {
+      row.style.fontWeight = 'bold';
+      row.style.borderLeft = '3px solid #007acc';
+    } else {
+      row.style.fontWeight = '';
+      row.style.borderLeft = '';
+    }
+  }
+
   function enhanceTable() {
     const businessKeys = extractBusinessKeys();
     addExportButton();
@@ -138,20 +199,9 @@
         const columnName = cells[1]?.textContent?.trim();
         if (!columnName) return;
 
-        // 清理旧样式
-        row.className = row.className
-          .replace(/field-type-\w+/g, "")
-          .replace(/field-(business-key|primary-key)/g, "");
-
         const typeText = cells[4]?.textContent?.toLowerCase()?.trim();
         if (typeText) {
-          const baseType = typeText.split(/[\(\s]/)[0];
-          row.classList.add(`field-type-${baseType}`);
-        }
-
-        // 动态业务主键匹配
-        if (businessKeys.includes(columnName)) {
-          row.classList.add("field-business-key");
+          applyFieldStyling(row, typeText, columnName, businessKeys);
         }
       });
   }
