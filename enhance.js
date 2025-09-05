@@ -156,17 +156,25 @@
       });
   }
 
-  setTimeout(enhanceTable, 500);
-
-  const observer = new MutationObserver(enhanceTable);
-  if (document.body) {
+  const observer = new MutationObserver((mutations) => {
+    const shouldEnhance = mutations.some(m => 
+      m.target.matches && (
+        m.target.matches('tr[ng-repeat*="column"]') ||
+        m.target.querySelector('tr[ng-repeat*="column"]')
+      )
+    );
+    if (shouldEnhance) enhanceTable();
+  });
+  
+  function initEnhancement() {
+    enhanceTable();
     observer.observe(document.body, { childList: true, subtree: true });
-  } else {
-    document.addEventListener("DOMContentLoaded", () => {
-      observer.observe(document.body, { childList: true, subtree: true });
-    });
   }
-
-  setInterval(enhanceTable, 500);
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", initEnhancement);
+  } else {
+    initEnhancement();
+  }
   window.debugEnhance = enhanceTable;
 })();
