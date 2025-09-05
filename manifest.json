@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "聚美美",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "美化聚源数据字典",
   "content_scripts": [
     {

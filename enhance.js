@@ -71,20 +71,17 @@
     table.parentNode.insertBefore(exportBtn, table);
   }
 
-  function exportTableToClipboard() {
+  function extractTableData() {
     const rows = document.querySelectorAll('tr[ng-repeat="column in columns"]');
     if (rows.length === 0) {
-      alert('没有找到表格数据');
-      return;
+      return null;
     }
 
-    const headers = ['序号', '列名', '中文名称', '有值率(%)', '类型', '空否', '备注'];
-    let tsvData = headers.join('\t') + '\n';
-
+    const data = [];
     rows.forEach(row => {
       const cells = row.querySelectorAll('td');
       if (cells.length >= 6) {
-        const rowData = [
+        data.push([
           cells[0]?.textContent?.trim() || '',
           cells[1]?.textContent?.trim() || '',
           cells[2]?.textContent?.trim() || '',
@@ -92,16 +89,40 @@
           cells[4]?.textContent?.trim() || '',
           cells[5]?.textContent?.trim() || '',
           cells[6]?.textContent?.trim() || ''
-        ];
-        tsvData += rowData.join('\t') + '\n';
+        ]);
       }
     });
+    return data;
+  }
 
-    navigator.clipboard.writeText(tsvData).then(() => {
+  function formatAsTsv(data) {
+    const headers = ['序号', '列名', '中文名称', '有值率(%)', '类型', '空否', '备注'];
+    let tsvData = headers.join('\t') + '\n';
+    
+    data.forEach(rowData => {
+      tsvData += rowData.join('\t') + '\n';
+    });
+    
+    return tsvData;
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
       alert('表格数据已复制到剪贴板，可直接粘贴到Excel');
     }).catch(() => {
-      alert('复制失败，请手动复制以下内容：\n\n' + tsvData);
+      alert('复制失败，请手动复制以下内容：\n\n' + text);
     });
+  }
+
+  function exportTableToClipboard() {
+    const data = extractTableData();
+    if (!data) {
+      alert('没有找到表格数据');
+      return;
+    }
+
+    const tsvData = formatAsTsv(data);
+    copyToClipboard(tsvData);
   }
 
   function enhanceTable() {
