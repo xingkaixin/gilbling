@@ -2,6 +2,18 @@
 (function () {
   "use strict";
 
+  // 错误处理配置
+  const ERROR_CONFIG = {
+    logToConsole: true,      // 开发环境开启控制台日志
+    silentMode: true         // 静默模式，失败时不影响用户体验
+  };
+
+  function logError(message, error) {
+    if (ERROR_CONFIG.logToConsole) {
+      console.error('[Gilbling Error]', message, error);
+    }
+  }
+
   // 字段类型映射表 - 消除200+行CSS硬编码选择器
   const FIELD_TYPE_MAP = {
     // 数字类型 - 蓝色
@@ -26,21 +38,27 @@
   };
 
   function extractBusinessKeys() {
-    const element = document.querySelector(
-      "[ng-bind=\"index.columnName || '无'\"]"
-    );
-    const keysText = element?.textContent?.trim();
+    try {
+      const element = document.querySelector(
+        "[ng-bind=\"index.columnName || '无'\"]"
+      );
+      const keysText = element?.textContent?.trim();
 
-    if (!keysText || keysText === "无") return ["ID"];
+      if (!keysText || keysText === "无") return ["ID"];
 
-    return keysText.split(",").map((k) => k.trim());
+      return keysText.split(",").map((k) => k.trim());
+    } catch (error) {
+      logError('提取业务主键失败', error);
+      return ["ID"]; // 默认值，确保功能降级
+    }
   }
 
   function addExportButton() {
-    if (document.querySelector('#table-export-btn')) return;
+    try {
+      if (document.querySelector('#table-export-btn')) return;
 
-    const table = document.querySelector('table');
-    if (!table) return;
+      const table = document.querySelector('table');
+      if (!table) return;
 
     const exportBtn = document.createElement('button');
     exportBtn.id = 'table-export-btn';
@@ -92,41 +110,55 @@
 
     exportBtn.addEventListener('click', exportTableToClipboard);
     table.parentNode.insertBefore(exportBtn, table);
+    } catch (error) {
+      logError('添加导出按钮失败', error);
+      // 静默失败，不影响原有功能
+    }
   }
 
   function extractTableData() {
-    const rows = document.querySelectorAll('tr[ng-repeat="column in columns"]');
-    if (rows.length === 0) {
+    try {
+      const rows = document.querySelectorAll('tr[ng-repeat="column in columns"]');
+      if (rows.length === 0) {
+        return null;
+      }
+
+      const data = [];
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 6) {
+          data.push([
+            cells[0]?.textContent?.trim() || '',
+            cells[1]?.textContent?.trim() || '',
+            cells[2]?.textContent?.trim() || '',
+            cells[3]?.textContent?.trim() || '',
+            cells[4]?.textContent?.trim() || '',
+            cells[5]?.textContent?.trim() || '',
+            cells[6]?.textContent?.trim() || ''
+          ]);
+        }
+      });
+      return data;
+    } catch (error) {
+      logError('提取表格数据失败', error);
       return null;
     }
-
-    const data = [];
-    rows.forEach(row => {
-      const cells = row.querySelectorAll('td');
-      if (cells.length >= 6) {
-        data.push([
-          cells[0]?.textContent?.trim() || '',
-          cells[1]?.textContent?.trim() || '',
-          cells[2]?.textContent?.trim() || '',
-          cells[3]?.textContent?.trim() || '',
-          cells[4]?.textContent?.trim() || '',
-          cells[5]?.textContent?.trim() || '',
-          cells[6]?.textContent?.trim() || ''
-        ]);
-      }
-    });
-    return data;
   }
 
   function formatAsTsv(data) {
-    const headers = ['序号', '列名', '中文名称', '有值率(%)', '类型', '空否', '备注'];
-    let tsvData = headers.join('\t') + '\n';
-    
-    data.forEach(rowData => {
-      tsvData += rowData.join('\t') + '\n';
-    });
-    
-    return tsvData;
+    try {
+      const headers = ['序号', '列名', '中文名称', '有值率(%)', '类型', '空否', '备注'];
+      let tsvData = headers.join('\t') + '\n';
+      
+      data.forEach(rowData => {
+        tsvData += rowData.join('\t') + '\n';
+      });
+      
+      return tsvData;
+    } catch (error) {
+      logError('格式化TSV数据失败', error);
+      return '';
+    }
   }
 
   function copyToClipboard(text) {
@@ -134,91 +166,129 @@
       alert('表格数据已复制到剪贴板，可直接粘贴到Excel');
     }).catch(() => {
       alert('复制失败，请手动复制以下内容：\n\n' + text);
+      logError('剪贴板复制失败', new Error('Clipboard permission denied or text too large'));
     });
   }
 
   function exportTableToClipboard() {
-    const data = extractTableData();
-    if (!data) {
-      alert('没有找到表格数据');
-      return;
-    }
+    try {
+      const data = extractTableData();
+      if (!data) {
+        alert('没有找到表格数据');
+        logError('导出表格失败', new Error('No table data found'));
+        return;
+      }
 
-    const tsvData = formatAsTsv(data);
-    copyToClipboard(tsvData);
+      const tsvData = formatAsTsv(data);
+      if (!tsvData) {
+        logError('导出表格失败', new Error('TSV formatting failed'));
+        return;
+      }
+
+      copyToClipboard(tsvData);
+    } catch (error) {
+      logError('导出表格过程中发生未知错误', error);
+    }
   }
 
   function getFieldTypeCategory(fieldType) {
-    const baseType = fieldType.split(/[\(\s]/)[0].toLowerCase();
-    for (const [category, types] of Object.entries(FIELD_TYPE_MAP)) {
-      if (types.includes(baseType)) {
-        return category;
+    try {
+      const baseType = fieldType.split(/[\(\s]/)[0].toLowerCase();
+      for (const [category, types] of Object.entries(FIELD_TYPE_MAP)) {
+        if (types.includes(baseType)) {
+          return category;
+        }
       }
+      return null;
+    } catch (error) {
+      logError('字段类型分类失败', error);
+      return null;
     }
-    return null;
   }
 
   function applyFieldStyling(row, fieldType, columnName, businessKeys) {
-    const cells = row.querySelectorAll("td");
-    if (cells.length < 5) return;
+    try {
+      const cells = row.querySelectorAll("td");
+      if (cells.length < 5) return;
 
-    // 清理旧样式
-    cells.forEach(cell => {
-      cell.style.color = '';
-      cell.style.fontWeight = '';
-    });
-
-    // 应用字段类型颜色
-    const category = getFieldTypeCategory(fieldType);
-    if (category && FIELD_TYPE_COLORS[category]) {
+      // 清理旧样式
       cells.forEach(cell => {
-        cell.style.color = FIELD_TYPE_COLORS[category];
+        cell.style.color = '';
+        cell.style.fontWeight = '';
       });
-    }
 
-    // 业务主键样式
-    if (businessKeys.includes(columnName)) {
-      row.style.fontWeight = 'bold';
-      row.style.borderLeft = '3px solid #007acc';
-    } else {
-      row.style.fontWeight = '';
-      row.style.borderLeft = '';
+      // 应用字段类型颜色
+      const category = getFieldTypeCategory(fieldType);
+      if (category && FIELD_TYPE_COLORS[category]) {
+        cells.forEach(cell => {
+          cell.style.color = FIELD_TYPE_COLORS[category];
+        });
+      }
+
+      // 业务主键样式
+      if (businessKeys.includes(columnName)) {
+        row.style.fontWeight = 'bold';
+        row.style.borderLeft = '3px solid #007acc';
+      } else {
+        row.style.fontWeight = '';
+        row.style.borderLeft = '';
+      }
+    } catch (error) {
+      logError('应用字段样式失败', error);
+      // 静默失败，不影响表格显示
     }
   }
 
   function enhanceTable() {
-    const businessKeys = extractBusinessKeys();
-    addExportButton();
+    try {
+      const businessKeys = extractBusinessKeys();
+      addExportButton();
 
-    document
-      .querySelectorAll('tr[ng-repeat="column in columns"]')
-      .forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length < 5) return;
+      document
+        .querySelectorAll('tr[ng-repeat="column in columns"]')
+        .forEach((row) => {
+          try {
+            const cells = row.querySelectorAll("td");
+            if (cells.length < 5) return;
 
-        const columnName = cells[1]?.textContent?.trim();
-        if (!columnName) return;
+            const columnName = cells[1]?.textContent?.trim();
+            if (!columnName) return;
 
-        const typeText = cells[4]?.textContent?.toLowerCase()?.trim();
-        if (typeText) {
-          applyFieldStyling(row, typeText, columnName, businessKeys);
-        }
-      });
+            const typeText = cells[4]?.textContent?.toLowerCase()?.trim();
+            if (typeText) {
+              applyFieldStyling(row, typeText, columnName, businessKeys);
+            }
+          } catch (rowError) {
+            logError('处理表格行失败', rowError);
+            // 继续处理其他行
+          }
+        });
+    } catch (error) {
+      logError('增强表格功能失败', error);
+    }
   }
 
   const observer = new MutationObserver((mutations) => {
-    const shouldEnhance = mutations.some(m => 
-      m.target.matches && (
-        m.target.matches('tr[ng-repeat*="column"]') ||
-        m.target.querySelector('tr[ng-repeat*="column"]')
-      )
-    );
-    if (shouldEnhance) enhanceTable();
+    try {
+      const shouldEnhance = mutations.some(m => 
+        m.target.matches && (
+          m.target.matches('tr[ng-repeat*="column"]') ||
+          m.target.querySelector('tr[ng-repeat*="column"]')
+        )
+      );
+      if (shouldEnhance) enhanceTable();
+    } catch (error) {
+      logError('MutationObserver处理失败', error);
+    }
   });
   
   function initEnhancement() {
-    enhanceTable();
-    observer.observe(document.body, { childList: true, subtree: true });
+    try {
+      enhanceTable();
+      observer.observe(document.body, { childList: true, subtree: true });
+    } catch (error) {
+      logError('初始化增强功能失败', error);
+    }
   }
   
   if (document.readyState === 'loading') {
