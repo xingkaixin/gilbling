@@ -1,2 +1,4 @@
 .claude/
 *.zip
+dist/
+node_modules/

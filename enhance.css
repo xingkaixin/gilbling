@@ -1,7 +1,0 @@
-/* enhance.css - 简化版，只保留通用规则 */
-
-/* 鼠标悬停高亮 */
-table.table-column tbody tr:hover td {
-  background-color: rgba(173, 216, 230, 0.3) !important;
-  transition: background-color 0.2s ease !important;
-}

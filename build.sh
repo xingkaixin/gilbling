@@ -1,34 +1,31 @@
 #!/bin/bash
 
 # 聚美美插件打包脚本
-set -e
+set -euo pipefail
 
-PLUGIN_NAME="聚美美"
-VERSION=$(grep '"version"' manifest.json | cut -d'"' -f4)
-BUILD_DIR="build"
+ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+PLUGIN_NAME="gilbing"
+DIST_DIR="$ROOT_DIR/dist"
+
+echo "开始构建 ${PLUGIN_NAME}..."
+
+rm -rf "$DIST_DIR" "${ROOT_DIR}"/*.zip
+
+cd "$ROOT_DIR"
+bun run build
+
+VERSION=$(bun -e "console.log(JSON.parse(await Bun.file('${DIST_DIR}/manifest.json').text()).version)")
 ZIP_NAME="${PLUGIN_NAME}-v${VERSION}.zip"
 
-echo "开始打包 ${PLUGIN_NAME} v${VERSION}..."
+echo "🔄 构建完成，开始打包 ${PLUGIN_NAME} v${VERSION}..."
 
-# 清理旧构建
-rm -rf "$BUILD_DIR"
-rm -f *.zip
+if [ ! -d "$DIST_DIR" ]; then
+  echo "❌ 构建失败，未找到 dist 目录" >&2
+  exit 1
+fi
 
-# 创建构建目录
-mkdir "$BUILD_DIR"
-
-# 复制核心文件 - manifest.json定义的就是全部
-cp manifest.json "$BUILD_DIR/"
-cp enhance.js "$BUILD_DIR/"
-cp enhance.css "$BUILD_DIR/"
-
-# 打包
-cd "$BUILD_DIR"
-zip -r "../$ZIP_NAME" .
-cd ..
-
-# 清理构建目录
-rm -rf "$BUILD_DIR"
+cd "$DIST_DIR"
+zip -r "${ROOT_DIR}/$ZIP_NAME" .
 
 echo "✅ 打包完成: $ZIP_NAME"
-echo "📦 包含文件: manifest.json, enhance.js, enhance.css"
+echo "📦 输出目录: dist"

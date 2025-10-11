@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .gilbling-row:hover td {
+    @apply bg-sky-200/30 transition-colors duration-200;
+  }
+}
