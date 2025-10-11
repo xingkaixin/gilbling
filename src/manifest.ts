@@ -6,6 +6,19 @@ export default defineManifest({
   version: "1.0.4",
   description: "美化聚源数据字典",
   permissions: ["activeTab"],
+  icons: {
+    16: "icons/icon16.png",
+    32: "icons/icon32.png",
+    48: "icons/icon48.png",
+    128: "icons/icon128.png",
+  },
+  action: {
+    default_icon: {
+      16: "icons/icon16.png",
+      32: "icons/icon32.png",
+      48: "icons/icon48.png",
+    },
+  },
   content_scripts: [
     {
       matches: ["https://dd.gildata.com/*"],
