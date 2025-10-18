@@ -6,4 +6,218 @@
   .gilbling-row:hover td {
     @apply bg-sky-200/30 transition-colors duration-200;
   }
+
+  /* 搜索高亮效果 */
+  .search-highlight {
+    @apply bg-yellow-200 transition-colors duration-300;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+  }
+
+  /* 搜索按钮容器 - 与导出按钮并排 */
+  #gilbling-search-button-root {
+    display: inline-block !important;
+    margin-left: 8px !important;
+  }
+
+  /* 搜索按钮样式 */
+  .search-button {
+    @apply flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-200;
+    font-size: 14px;
+    color: #374151;
+  }
+
+  .search-button:hover {
+    @apply bg-blue-50 text-blue-600;
+  }
+
+  .search-button-icon {
+    @apply text-gray-400;
+  }
+
+  .search-button:hover .search-button-icon {
+    @apply text-blue-500;
+  }
+
+  .search-button-text {
+    font-weight: 500;
+  }
+
+  .search-shortcut {
+    @apply px-2 py-1 text-xs bg-gray-100 border border-gray-200 rounded text-gray-500 font-mono;
+  }
+
+  /* 搜索弹窗遮罩 */
+  .search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10001;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+  }
+
+  .search-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+  }
+
+  /* 搜索容器 */
+  .search-container {
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transform: scale(0.95) translateY(-20px);
+    opacity: 0;
+    animation: searchShowIn 0.2s ease forwards;
+  }
+
+  @keyframes searchShowIn {
+    to {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* 搜索输入框 */
+  .search-input-wrapper {
+    @apply flex items-center gap-3 px-4 py-3 border-b border-gray-200;
+  }
+
+  .search-icon {
+    @apply text-gray-400;
+  }
+
+  .search-input {
+    @apply flex-1 px-3 py-2 text-base border-0 outline-none bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all duration-200;
+  }
+
+  .search-input::placeholder {
+    @apply text-gray-400;
+  }
+
+  .search-clear {
+    @apply p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200;
+  }
+
+  .search-close {
+    @apply px-2 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors duration-200;
+  }
+
+  /* 搜索内容区域 */
+  .search-content {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  /* 搜索结果头部 */
+  .search-results-header {
+    @apply px-4 py-2 bg-gray-50 border-b border-gray-100;
+  }
+
+  /* 搜索结果列表 */
+  .search-results-list {
+    @apply divide-y divide-gray-100;
+  }
+
+  .search-result-item {
+    @apply px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150;
+  }
+
+  .search-result-item.selected {
+    @apply bg-blue-50;
+  }
+
+  .search-result-content {
+    @apply flex items-center justify-between;
+  }
+
+  .search-result-primary {
+    @apply flex-1 min-w-0;
+  }
+
+  .search-result-column {
+    @apply flex items-center gap-2;
+  }
+
+  .search-result-chinese {
+    @apply text-gray-600;
+  }
+
+  .search-result-meta {
+    @apply flex items-center;
+  }
+
+  .search-match-type {
+    @apply px-2 py-1 text-xs font-medium rounded;
+  }
+
+  /* 空状态 */
+  .search-results-empty {
+    @apply px-4 py-8 text-center;
+  }
+
+  /* 加载状态 */
+  .search-loading {
+    @apply px-4 py-8 text-center;
+  }
+
+  /* 搜索底部 */
+  .search-footer {
+    @apply px-4 py-2 bg-gray-50 border-t border-gray-100 text-center;
+  }
+
+  /* 滚动条样式 */
+  .search-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .search-content::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  .search-content::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  .search-content::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 640px) {
+    .search-overlay {
+      @apply p-4;
+      padding-top: 10vh;
+    }
+
+    .search-container {
+      @apply w-full;
+      max-width: none;
+    }
+
+    .search-input-wrapper {
+      @apply px-3 py-2;
+    }
+
+    .search-result-item {
+      @apply px-3 py-2;
+    }
+
+    #gilbling-search-button-root {
+      margin-left: 4px !important;
+    }
+  }
 }

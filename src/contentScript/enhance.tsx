@@ -1,5 +1,8 @@
 import { createRoot } from "react-dom/client";
 import { ExportButton } from "./components/ExportButton";
+import { SearchButton } from "./components/SearchButton";
+import { createSearchBox } from "./components/SearchBox";
+import { searchManager } from "./utils/search";
 
 const ERROR_CONFIG = {
   logToConsole: true,
@@ -64,6 +67,11 @@ declare global {
   interface Window {
     debugEnhance?: () => void;
     __gilblingInitialized?: boolean;
+    __gilblingSearch?: {
+      open: () => void;
+      close: () => void;
+      destroy: () => void;
+    };
   }
 }
 
@@ -237,10 +245,110 @@ function addExportButton() {
   }
 }
 
+function addSearchButton() {
+  try {
+    const containerId = "gilbling-search-button-root";
+    if (document.getElementById(containerId)) {
+      return;
+    }
+
+    // 查找导出按钮容器
+    const exportContainer = document.getElementById("gilbling-export-root");
+    if (!exportContainer) {
+      // 如果导出容器不存在，延迟一段时间后重试
+      setTimeout(() => {
+        addSearchButton();
+      }, 100);
+      return;
+    }
+
+    // 创建搜索按钮容器
+    const container = document.createElement("div");
+    container.id = containerId;
+    container.style.display = "inline-block";
+    container.style.marginLeft = "8px";
+
+    // 更安全的插入逻辑
+    const parent = exportContainer.parentNode;
+    if (parent && exportContainer.nextSibling) {
+      parent.insertBefore(container, exportContainer.nextSibling);
+    } else if (parent) {
+      parent.appendChild(container);
+    } else {
+      document.body.appendChild(container);
+    }
+
+    const root = createRoot(container);
+    root.render(<SearchButton onClick={() => searchBox?.open()} />);
+  } catch (error) {
+    logError("添加搜索按钮失败", error);
+  }
+}
+
+let searchBox: ReturnType<typeof createSearchBox> | null = null;
+
+function initSearchFunctionality() {
+  try {
+    // 初始化搜索管理器索引
+    searchManager.buildIndex();
+
+    // 创建搜索框实例
+    if (!searchBox) {
+      searchBox = createSearchBox();
+    }
+
+    // 添加搜索按钮（与导出按钮并排）
+    addSearchButton();
+
+    // 全局快捷键支持
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + K 打开搜索
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchBox?.open();
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    // 保存清理函数到全局
+    window.__gilblingSearch = searchBox;
+
+    return () => {
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  } catch (error) {
+    logError("初始化搜索功能失败", error);
+  }
+}
+
+function cleanupSearchFunctionality() {
+  try {
+    if (searchBox) {
+      searchBox.destroy();
+      searchBox = null;
+    }
+
+    // 清理搜索按钮容器
+    const searchButtonContainer = document.getElementById("gilbling-search-button-root");
+    if (searchButtonContainer) {
+      searchButtonContainer.remove();
+    }
+
+    delete window.__gilblingSearch;
+  } catch (error) {
+    logError("清理搜索功能失败", error);
+  }
+}
+
 function enhanceTable() {
   try {
     const businessKeys = extractBusinessKeys();
     addExportButton();
+    addSearchButton();
+
+    // 初始化搜索功能（只在第一次调用时初始化）
+    initSearchFunctionality();
 
     document
       .querySelectorAll<TableRow>('tr[ng-repeat="column in columns"]')
@@ -274,6 +382,8 @@ const observer = new MutationObserver((mutations) => {
     });
 
     if (shouldEnhance) {
+      // 清理搜索索引，因为页面内容可能已经改变
+      searchManager.clearIndex();
       enhanceTable();
     }
   } catch (error) {
