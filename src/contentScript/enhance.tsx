@@ -643,31 +643,27 @@ function addSearchButton() {
       return;
     }
 
-    // 查找导出按钮容器
     const exportContainer = document.getElementById("gilbling-export-root");
     if (!exportContainer) {
-      // 如果导出容器不存在，延迟一段时间后重试
       setTimeout(() => {
         addSearchButton();
       }, 100);
       return;
     }
 
-    // 创建搜索按钮容器
-    const container = document.createElement("div");
-    container.id = containerId;
-    container.style.display = "inline-block";
-    container.style.marginLeft = "8px";
+    const buttonGroup =
+      exportContainer.querySelector<HTMLElement>(".gilbling-button-group");
 
-    // 更安全的插入逻辑
-    const parent = exportContainer.parentNode;
-    if (parent && exportContainer.nextSibling) {
-      parent.insertBefore(container, exportContainer.nextSibling);
-    } else if (parent) {
-      parent.appendChild(container);
-    } else {
-      document.body.appendChild(container);
+    if (!buttonGroup) {
+      setTimeout(() => {
+        addSearchButton();
+      }, 100);
+      return;
     }
+
+    const container = document.createElement("span");
+    container.id = containerId;
+    buttonGroup.appendChild(container);
 
     const root = createRoot(container);
     root.render(<SearchButton onClick={() => searchBox?.open()} />);

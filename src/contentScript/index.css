@@ -1,223 +1,342 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Gilbling 内容脚本通用样式 */
+.gilbling-button-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
 
-@layer components {
-  .gilbling-row:hover td {
-    @apply bg-sky-200/30 transition-colors duration-200;
-  }
-
-  /* 搜索高亮效果 */
-  .search-highlight {
-    @apply bg-yellow-200 transition-colors duration-300;
-    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
-  }
-
-  /* 搜索按钮容器 - 与导出按钮并排 */
-  #gilbling-search-button-root {
-    display: inline-block !important;
-    margin-left: 8px !important;
-  }
-
-  /* 搜索按钮样式 */
-  .search-button {
-    @apply flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md hover:border-blue-400 transition-all duration-200;
-    font-size: 14px;
+.gilbling-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #ffffff;
     color: #374151;
-  }
+    font-size: 13px;
+    line-height: 1.25;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        transform 0.15s ease;
+}
 
-  .search-button:hover {
-    @apply bg-blue-50 text-blue-600;
-  }
+.gilbling-btn:hover {
+    background-color: #f3f4f6;
+}
 
-  .search-button-icon {
-    @apply text-gray-400;
-  }
+.gilbling-btn:active {
+    transform: scale(0.98);
+}
 
-  .search-button:hover .search-button-icon {
-    @apply text-blue-500;
-  }
-
-  .search-button-text {
+.search-button {
     font-weight: 500;
-  }
+}
 
-  .search-shortcut {
-    @apply px-2 py-1 text-xs bg-gray-100 border border-gray-200 rounded text-gray-500 font-mono;
-  }
+.search-button-icon {
+    width: 16px;
+    height: 16px;
+}
 
-  /* 搜索弹窗遮罩 */
-  .search-overlay {
+.search-shortcut {
+    padding: 0 6px;
+    border-radius: 4px;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.gilbling-row:hover td {
+    background-color: #eff6ff;
+    transition: background-color 0.2s ease;
+}
+
+.search-highlight {
+    background-color: #fef3c7 !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35);
+    transition: background-color 0.3s ease;
+}
+
+.search-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10001;
+    inset: 0;
+    z-index: 9999;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 15vh;
-  }
+    padding: 10vh 16px 24px;
+    box-sizing: border-box;
+}
 
-  .search-backdrop {
+.search-backdrop {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(2px);
-  }
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+}
 
-  /* 搜索容器 */
-  .search-container {
+.search-container {
     position: relative;
-    width: 90%;
-    max-width: 600px;
-    background: white;
+    z-index: 1;
+    width: min(640px, 100%);
+    background-color: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 22px 45px -20px rgba(15, 23, 42, 0.45);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    transform: scale(0.95) translateY(-20px);
-    opacity: 0;
-    animation: searchShowIn 0.2s ease forwards;
-  }
+    max-height: calc(100vh - 120px);
+}
 
-  @keyframes searchShowIn {
-    to {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-  }
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
 
-  /* 搜索输入框 */
-  .search-input-wrapper {
-    @apply flex items-center gap-3 px-4 py-3 border-b border-gray-200;
-  }
+.search-icon {
+    display: flex;
+    align-items: center;
+    color: #9ca3af;
+}
 
-  .search-icon {
-    @apply text-gray-400;
-  }
+.search-icon-svg {
+    width: 20px;
+    height: 20px;
+}
 
-  .search-input {
-    @apply flex-1 px-3 py-2 text-base border-0 outline-none bg-gray-50 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all duration-200;
-  }
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    line-height: 20px;
+    color: #111827;
+    outline: none;
+}
 
-  .search-input::placeholder {
-    @apply text-gray-400;
-  }
+.search-input::placeholder {
+    color: #9ca3af;
+}
 
-  .search-clear {
-    @apply p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors duration-200;
-  }
+.search-clear {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
 
-  .search-close {
-    @apply px-2 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors duration-200;
-  }
+.search-clear:hover {
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
 
-  /* 搜索内容区域 */
-  .search-content {
-    max-height: 400px;
+.search-clear-icon {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+}
+
+.search-close {
+    margin-left: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.15s ease;
+}
+
+.search-close:hover {
+    color: #111827;
+}
+
+.search-close-key {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: #e5e7eb;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 500;
+}
+
+.search-content {
+    max-height: 360px;
     overflow-y: auto;
-  }
+    background-color: #ffffff;
+}
 
-  /* 搜索结果头部 */
-  .search-results-header {
-    @apply px-4 py-2 bg-gray-50 border-b border-gray-100;
-  }
-
-  /* 搜索结果列表 */
-  .search-results-list {
-    @apply divide-y divide-gray-100;
-  }
-
-  .search-result-item {
-    @apply px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150;
-  }
-
-  .search-result-item.selected {
-    @apply bg-blue-50;
-  }
-
-  .search-result-content {
-    @apply flex items-center justify-between;
-  }
-
-  .search-result-primary {
-    @apply flex-1 min-w-0;
-  }
-
-  .search-result-column {
-    @apply flex items-center gap-2;
-  }
-
-  .search-result-chinese {
-    @apply text-gray-600;
-  }
-
-  .search-result-meta {
-    @apply flex items-center;
-  }
-
-  .search-match-type {
-    @apply px-2 py-1 text-xs font-medium rounded;
-  }
-
-  /* 空状态 */
-  .search-results-empty {
-    @apply px-4 py-8 text-center;
-  }
-
-  /* 加载状态 */
-  .search-loading {
-    @apply px-4 py-8 text-center;
-  }
-
-  /* 搜索底部 */
-  .search-footer {
-    @apply px-4 py-2 bg-gray-50 border-t border-gray-100 text-center;
-  }
-
-  /* 滚动条样式 */
-  .search-content::-webkit-scrollbar {
+.search-content::-webkit-scrollbar {
     width: 6px;
-  }
+}
 
-  .search-content::-webkit-scrollbar-track {
-    @apply bg-gray-100;
-  }
+.search-content::-webkit-scrollbar-track {
+    background-color: #f3f4f6;
+}
 
-  .search-content::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
-  }
+.search-content::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 9999px;
+}
 
-  .search-content::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
-  }
+.search-content::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
 
-  /* 响应式设计 */
-  @media (max-width: 640px) {
+.search-loading,
+.search-results-empty {
+    padding: 24px 16px;
+    text-align: center;
+}
+
+.search-status-text {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-results-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.search-results-count {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: #f3f4f6;
+}
+
+.search-result-item.selected {
+    background-color: #e0f2fe;
+}
+
+.search-result-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.search-result-primary {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-result-column {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-result-column-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    word-break: break-all;
+}
+
+.search-result-chinese {
+    font-size: 13px;
+    color: #4b5563;
+    word-break: break-all;
+}
+
+.search-result-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.search-match-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.search-match-type.match-type-column {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.search-match-type.match-type-chinese {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.search-match-type.match-type-both {
+    background-color: #ede9fe;
+    color: #6d28d9;
+}
+
+.search-match-type.match-type-default {
+    background-color: #f3f4f6;
+    color: #4b5563;
+}
+
+.search-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.search-footer-text {
+    font-size: 12px;
+    color: #9ca3af;
+    text-align: center;
+}
+
+@media (max-width: 640px) {
     .search-overlay {
-      @apply p-4;
-      padding-top: 10vh;
+        padding: 8vh 12px;
     }
 
     .search-container {
-      @apply w-full;
-      max-width: none;
+        width: 100%;
+        max-height: calc(100vh - 96px);
     }
 
     .search-input-wrapper {
-      @apply px-3 py-2;
+        padding: 10px 12px;
     }
 
     .search-result-item {
-      @apply px-3 py-2;
+        padding: 10px 12px;
     }
-
-    #gilbling-search-button-root {
-      margin-left: 4px !important;
-    }
-  }
 }

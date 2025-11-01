@@ -1,18 +1,20 @@
-import React, { useEffect, useRef } from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { useRef } from "react";
 
 interface SearchButtonProps {
   onClick: () => void;
   shortcut?: string;
 }
 
-export const SearchButton: React.FC<SearchButtonProps> = ({ onClick, shortcut = 'Ctrl+K' }) => {
+export const SearchButton: React.FC<SearchButtonProps> = ({
+  onClick,
+  shortcut = "Ctrl+K",
+}) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <button
       ref={buttonRef}
-      className="search-button"
+      className="search-button gilbling-btn"
       onClick={onClick}
       title={`搜索字段 (${shortcut})`}
     >

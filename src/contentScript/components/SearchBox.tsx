@@ -162,7 +162,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
         <div className="search-input-wrapper">
           <div className="search-icon">
             <svg
-              className="w-5 h-5 text-gray-400"
+              className="search-icon-svg"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -195,9 +195,11 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
                 setSelectedIndex(-1);
                 inputRef.current?.focus();
               }}
+              type="button"
+              aria-label="清除搜索"
             >
               <svg
-                className="w-4 h-4 text-gray-400"
+                className="search-clear-icon"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -212,15 +214,15 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
             </button>
           )}
 
-          <button className="search-close" onClick={onClose}>
-            <span className="text-sm text-gray-500">ESC</span>
+          <button className="search-close" onClick={onClose} type="button">
+            <span className="search-close-key">ESC</span>
           </button>
         </div>
 
         <div className="search-content">
           {isSearching ? (
             <div className="search-loading">
-              <div className="text-center py-4 text-gray-500">搜索中...</div>
+              <div className="search-status-text">搜索中...</div>
             </div>
           ) : (
             <SearchResults
@@ -234,7 +236,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
 
         {query && (
           <div className="search-footer">
-            <div className="text-xs text-gray-400">
+            <div className="search-footer-text">
               使用 ↑↓ 导航，Enter 选择，ESC 关闭
             </div>
           </div>
