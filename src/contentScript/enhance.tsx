@@ -6,7 +6,7 @@ import { searchManager } from "./utils/search";
 
 const ERROR_CONFIG = {
   logToConsole: true,
-  silentMode: true
+  silentMode: true,
 } as const;
 
 const FIELD_TYPE_MAP = {
@@ -26,7 +26,7 @@ const FIELD_TYPE_MAP = {
     "binary_float",
     "binary_double",
     "smallmoney",
-    "money"
+    "money",
   ],
   string: [
     "varchar",
@@ -37,7 +37,7 @@ const FIELD_TYPE_MAP = {
     "nvarchar2",
     "nchar",
     "char2",
-    "long"
+    "long",
   ],
   datetime: [
     "date",
@@ -46,10 +46,10 @@ const FIELD_TYPE_MAP = {
     "time",
     "datetime2",
     "datetimeoffset",
-    "smalldatetime"
+    "smalldatetime",
   ],
   binary: ["blob", "binary", "varbinary", "raw", "image"],
-  boolean: ["bit", "bool", "boolean"]
+  boolean: ["bit", "bool", "boolean"],
 } as const;
 
 const FIELD_TYPE_COLORS: Record<keyof typeof FIELD_TYPE_MAP, string> = {
@@ -57,7 +57,34 @@ const FIELD_TYPE_COLORS: Record<keyof typeof FIELD_TYPE_MAP, string> = {
   string: "#008000",
   datetime: "#FF8C00",
   binary: "#800080",
-  boolean: "#DC143C"
+  boolean: "#DC143C",
+};
+
+const TABLE_HEADERS = [
+  "序号",
+  "列名",
+  "中文名称",
+  "有值率(%)",
+  "类型",
+  "空否",
+  "备注",
+] as const;
+
+type TableMeta = {
+  chineseName?: string;
+  englishName?: string;
+  authStatus?: string;
+  endDate?: string;
+  description?: string;
+  updateFrequency?: string;
+  businessKeyText?: string;
+  tableStatus?: string;
+  lastModified?: string;
+};
+
+type TableRemark = {
+  label: string;
+  text: string;
 };
 
 type FieldCategory = keyof typeof FIELD_TYPE_MAP;
@@ -82,9 +109,177 @@ function logError(message: string, error: unknown) {
   }
 }
 
+function normalizeWhitespace(
+  value: string,
+  preserveLineBreaks = false,
+): string {
+  const replaced = value.replace(/\u00a0/g, " ");
+  if (preserveLineBreaks) {
+    return replaced
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+  return replaced.replace(/\s+/g, " ").trim();
+}
+
+function getElementText(
+  element: HTMLElement | null,
+  preserveLineBreaks = false,
+): string | null {
+  if (!element) {
+    return null;
+  }
+
+  if (preserveLineBreaks) {
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll("br").forEach((br) => {
+      br.replaceWith("\n");
+    });
+    return normalizeWhitespace(clone.textContent ?? "", true);
+  }
+
+  return normalizeWhitespace(element.textContent ?? "");
+}
+
+function extractTableMeta(): TableMeta {
+  try {
+    const meta: TableMeta = {};
+
+    const header = document.getElementById("table-name-title");
+    if (header) {
+      meta.chineseName =
+        getElementText(
+          header.querySelector<HTMLElement>(
+            '[ng-bind-html*="table.tableChiName"]',
+          ),
+        ) ?? undefined;
+      meta.englishName =
+        getElementText(
+          header.querySelector<HTMLElement>(
+            '[ng-bind-html*="table.tableName"]',
+          ),
+        ) ?? undefined;
+      meta.authStatus =
+        getElementText(header.querySelector<HTMLElement>(".point-icon")) ??
+        undefined;
+      meta.endDate =
+        getElementText(header.querySelector<HTMLElement>(".end-date-tip")) ??
+        undefined;
+    }
+
+    const headInfo = document.getElementById("tableHeadInfo");
+    if (headInfo) {
+      meta.description =
+        getElementText(
+          headInfo.querySelector<HTMLElement>(
+            '[ng-bind-html*="table.description"]',
+          ),
+          true,
+        ) ?? undefined;
+      meta.updateFrequency =
+        getElementText(
+          headInfo.querySelector<HTMLElement>(
+            '[ng-bind="table.tableUpdateTime"]',
+          ),
+        ) ?? undefined;
+      meta.tableStatus =
+        getElementText(headInfo.querySelector<HTMLElement>(".table-status")) ??
+        undefined;
+
+      const businessKeyElement = headInfo.querySelector<HTMLElement>(
+        "[ng-bind=\"index.columnName || '无'\"]",
+      );
+      const businessKeyText = getElementText(businessKeyElement);
+      if (businessKeyText && businessKeyText !== "无") {
+        meta.businessKeyText = businessKeyText;
+      }
+    }
+
+    const lastModifiedElement = document.querySelector<HTMLElement>(
+      '[ng-bind="lastModifyDateToShow"]',
+    );
+    meta.lastModified = getElementText(lastModifiedElement) ?? undefined;
+
+    return meta;
+  } catch (error) {
+    logError("提取表信息失败", error);
+    return {};
+  }
+}
+
+function extractRemarkEntries(): TableRemark[] {
+  try {
+    const rows = document.querySelectorAll<HTMLTableRowElement>(
+      ".table-remark tbody tr",
+    );
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const remarks: TableRemark[] = [];
+
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll<HTMLTableCellElement>("td");
+      if (cells.length < 2) {
+        return;
+      }
+
+      const labelCell = cells.item(0);
+      const detailCell = cells.item(1);
+      const label = getElementText(labelCell) ?? "";
+      const toggleContainer =
+        detailCell?.querySelector<HTMLElement>("[toggle-remark]");
+      const textSource =
+        toggleContainer?.getAttribute("toggle-data") ??
+        toggleContainer?.textContent ??
+        detailCell?.textContent ??
+        "";
+      const text = normalizeWhitespace(textSource, true);
+
+      if (!label && !text) {
+        return;
+      }
+
+      remarks.push({ label, text });
+    });
+
+    return remarks;
+  } catch (error) {
+    logError("提取备注说明失败", error);
+    return [];
+  }
+}
+
+function findMainTable(): HTMLTableElement | null {
+  const selectors = [
+    "#table-info table.table-column",
+    "#table-info table.table-interval-bg",
+    "#table-info table",
+    "#main-content-block table.table-column",
+    "#main-content-block table.table-interval-bg",
+    "#main-content-block table",
+    "table.table-column",
+    "table.table-interval-bg",
+    "table",
+  ];
+
+  for (const selector of selectors) {
+    const table = document.querySelector<HTMLTableElement>(selector);
+    if (table && table.querySelector('tr[ng-repeat="column in columns"]')) {
+      return table;
+    }
+  }
+
+  return null;
+}
+
 function extractBusinessKeys(): string[] {
   try {
-    const element = document.querySelector('[ng-bind="index.columnName || \'无\'"]');
+    const element = document.querySelector(
+      "[ng-bind=\"index.columnName || '无'\"]",
+    );
     const keysText = element?.textContent?.trim();
 
     if (!keysText || keysText === "无") {
@@ -100,7 +295,14 @@ function extractBusinessKeys(): string[] {
 
 function extractTableData(): string[][] | null {
   try {
-    const rows = document.querySelectorAll<HTMLTableRowElement>('tr[ng-repeat="column in columns"]');
+    const table = findMainTable();
+    if (!table) {
+      return null;
+    }
+
+    const rows = table.querySelectorAll<HTMLTableRowElement>(
+      'tr[ng-repeat="column in columns"]',
+    );
     if (rows.length === 0) {
       return null;
     }
@@ -110,7 +312,10 @@ function extractTableData(): string[][] | null {
       const cells = row.querySelectorAll<HTMLTableCellElement>("td");
       if (cells.length >= 6) {
         data.push(
-          Array.from({ length: 7 }, (_, index) => cells[index]?.textContent?.trim() ?? "")
+          Array.from(
+            { length: 7 },
+            (_, index) => cells[index]?.textContent?.trim() ?? "",
+          ),
         );
       }
     });
@@ -124,9 +329,8 @@ function extractTableData(): string[][] | null {
 
 function formatAsTsv(data: string[][]): string {
   try {
-    const headers = ["序号", "列名", "中文名称", "有值率(%)", "类型", "空否", "备注"];
     const rows = data.map((rowData) => rowData.join("\t"));
-    return [headers.join("\t"), ...rows].join("\n");
+    return [TABLE_HEADERS.join("\t"), ...rows].join("\n");
   } catch (error) {
     logError("格式化TSV数据失败", error);
     return "";
@@ -141,7 +345,25 @@ function copyToClipboard(text: string) {
     })
     .catch(() => {
       window.alert(`复制失败，请手动复制以下内容：\n\n${text}`);
-      logError("剪贴板复制失败", new Error("Clipboard permission denied or text too large"));
+      logError(
+        "剪贴板复制失败",
+        new Error("Clipboard permission denied or text too large"),
+      );
+    });
+}
+
+function copyMarkdownToClipboard(markdown: string) {
+  navigator.clipboard
+    .writeText(markdown)
+    .then(() => {
+      window.alert("Markdown 已复制到剪贴板，可直接粘贴到文档");
+    })
+    .catch(() => {
+      window.alert(`复制 Markdown 失败，请手动复制以下内容：\n\n${markdown}`);
+      logError(
+        "复制 Markdown 失败",
+        new Error("Clipboard permission denied or text too large"),
+      );
     });
 }
 
@@ -166,6 +388,168 @@ function exportTableToClipboard() {
   }
 }
 
+function sanitizeMarkdownCell(value: string): string {
+  return value
+    .replace(/\r?\n|\r/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\|/g, "\\|")
+    .trim();
+}
+
+function buildMarkdownTable(data: string[][]): string {
+  const headerLine = `| ${TABLE_HEADERS.join(" | ")} |`;
+  const dividerLine = `| ${TABLE_HEADERS.map(() => "---").join(" | ")} |`;
+  const bodyLines = data
+    .map((row) => row.map((cell) => sanitizeMarkdownCell(cell)))
+    .map((row) => `| ${row.join(" | ")} |`);
+  return [headerLine, dividerLine, ...bodyLines].join("\n");
+}
+
+function buildRemarksMarkdown(remarks: TableRemark[]): string {
+  if (remarks.length === 0) {
+    return "";
+  }
+
+  const headerLine = "| 标记 | 说明 |";
+  const dividerLine = "| --- | --- |";
+  const bodyLines = remarks.map(({ label, text }) => {
+    const safeLabel = sanitizeMarkdownCell(label);
+    const safeText = sanitizeMarkdownCell(text);
+    return `| ${safeLabel} | ${safeText} |`;
+  });
+
+  return [headerLine, dividerLine, ...bodyLines].join("\n");
+}
+
+function getTextContentBySelectors(
+  selectors: string[],
+  preserveLineBreaks = false,
+): string | null {
+  for (const selector of selectors) {
+    const element = document.querySelector<HTMLElement>(selector);
+    const text = getElementText(element ?? null, preserveLineBreaks);
+    if (text) {
+      return text;
+    }
+  }
+  return null;
+}
+
+function extractPageTitle(): string {
+  const title =
+    getTextContentBySelectors([
+      '[ng-bind-html*="table.tableChiName"]',
+      '[ng-bind-html*="table.tableName"]',
+      '[ng-bind*="tableName"]',
+      '[ng-bind*="table_name"]',
+      "header h1",
+      "header h2",
+      "h1",
+      "h2",
+    ]) ?? document.title?.trim();
+  return title && title.length > 0 ? title : "未命名表";
+}
+
+function extractPageDescription(): string {
+  const description = getTextContentBySelectors(
+    [
+      '[ng-bind-html*="table.description"]',
+      '[ng-bind*="tableDesc"]',
+      '[ng-bind*="table_desc"]',
+      ".table-desc",
+      ".table-description",
+      ".description",
+    ],
+    true,
+  );
+
+  if (!description) {
+    return "";
+  }
+
+  const normalized = description.replace(/\s{2,}/g, " ").trim();
+
+  if (!normalized || normalized === "无" || normalized === "暂无") {
+    return "";
+  }
+
+  return normalized;
+}
+
+function copyPageAsMarkdown() {
+  try {
+    const data = extractTableData();
+    if (!data) {
+      window.alert("没有找到表格数据");
+      logError("复制页面为Markdown失败", new Error("No table data found"));
+      return;
+    }
+
+    const meta = extractTableMeta();
+    const markdownTable = buildMarkdownTable(data);
+    const remarks = extractRemarkEntries();
+
+    const fallbackTitle = extractPageTitle();
+    const title = meta.chineseName ?? fallbackTitle;
+    const description = meta.description ?? extractPageDescription();
+    const englishName = meta.englishName;
+
+    const lines = [`# ${title}`, ""];
+
+    if (englishName && englishName !== title) {
+      lines.push(`**英文名称：** ${englishName}`, "");
+    }
+
+    if (description) {
+      if (description.includes("\n")) {
+        lines.push("**说明：**", "");
+        lines.push(description, "");
+      } else {
+        lines.push(`**说明：** ${description}`, "");
+      }
+    }
+
+    const infoItems: string[] = [];
+    if (meta.authStatus) {
+      infoItems.push(`- **权限状态：** ${meta.authStatus}`);
+    }
+    if (meta.endDate) {
+      infoItems.push(`- **到期时间：** ${meta.endDate}`);
+    }
+    if (meta.updateFrequency) {
+      infoItems.push(`- **表数据更新频率：** ${meta.updateFrequency}`);
+    }
+    if (meta.tableStatus) {
+      infoItems.push(`- **表状态：** ${meta.tableStatus}`);
+    }
+    if (meta.businessKeyText) {
+      infoItems.push(`- **业务唯一性：** ${meta.businessKeyText}`);
+    }
+    if (meta.lastModified) {
+      infoItems.push(`- **最后修改日期：** ${meta.lastModified}`);
+    }
+
+    if (infoItems.length > 0) {
+      lines.push("## 表信息", "", ...infoItems, "");
+    }
+
+    lines.push("## 字段定义", "", markdownTable, "");
+
+    if (remarks.length > 0) {
+      const remarksMarkdown = buildRemarksMarkdown(remarks);
+      if (remarksMarkdown) {
+        lines.push("## 备注说明", "", remarksMarkdown, "");
+      }
+    }
+
+    lines.push(`> 生成时间：${new Date().toLocaleString()}`);
+
+    copyMarkdownToClipboard(lines.join("\n"));
+  } catch (error) {
+    logError("复制页面为Markdown失败", error);
+  }
+}
+
 function getFieldTypeCategory(fieldType: string): FieldCategory | null {
   try {
     const [rawType] = fieldType.split(/[\(\s]/);
@@ -174,9 +558,11 @@ function getFieldTypeCategory(fieldType: string): FieldCategory | null {
       return null;
     }
 
-    return (Object.entries(FIELD_TYPE_MAP) as [FieldCategory, readonly string[]][]).find(([, types]) =>
-      types.includes(baseType)
-    )?.[0] ?? null;
+    return (
+      (
+        Object.entries(FIELD_TYPE_MAP) as [FieldCategory, readonly string[]][]
+      ).find(([, types]) => types.includes(baseType))?.[0] ?? null
+    );
   } catch (error) {
     logError("字段类型分类失败", error);
     return null;
@@ -187,7 +573,7 @@ function applyFieldStyling(
   row: TableRow,
   fieldType: string,
   columnName: string,
-  businessKeys: readonly string[]
+  businessKeys: readonly string[],
 ) {
   try {
     const cells = row.querySelectorAll<HTMLTableCellElement>("td");
@@ -229,7 +615,7 @@ function addExportButton() {
       return;
     }
 
-    const table = document.querySelector<HTMLTableElement>("table");
+    const table = findMainTable();
     if (!table || !table.parentElement) {
       return;
     }
@@ -239,7 +625,12 @@ function addExportButton() {
     table.parentElement.insertBefore(container, table);
 
     const root = createRoot(container);
-    root.render(<ExportButton onExport={exportTableToClipboard} />);
+    root.render(
+      <ExportButton
+        onExport={exportTableToClipboard}
+        onCopyMarkdown={copyPageAsMarkdown}
+      />,
+    );
   } catch (error) {
     logError("添加导出按钮失败", error);
   }
@@ -303,19 +694,19 @@ function initSearchFunctionality() {
     // 全局快捷键支持
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + K 打开搜索
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         searchBox?.open();
       }
     };
 
-    document.addEventListener('keydown', handleGlobalKeyDown);
+    document.addEventListener("keydown", handleGlobalKeyDown);
 
     // 保存清理函数到全局
     window.__gilblingSearch = searchBox;
 
     return () => {
-      document.removeEventListener('keydown', handleGlobalKeyDown);
+      document.removeEventListener("keydown", handleGlobalKeyDown);
     };
   } catch (error) {
     logError("初始化搜索功能失败", error);
@@ -330,7 +721,9 @@ function cleanupSearchFunctionality() {
     }
 
     // 清理搜索按钮容器
-    const searchButtonContainer = document.getElementById("gilbling-search-button-root");
+    const searchButtonContainer = document.getElementById(
+      "gilbling-search-button-root",
+    );
     if (searchButtonContainer) {
       searchButtonContainer.remove();
     }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
-import { searchManager, SearchResult, debounce } from '../utils/search';
-import { SearchResults } from './SearchResults';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createRoot } from "react-dom/client";
+import { searchManager, SearchResult, debounce } from "../utils/search";
+import { SearchResults } from "./SearchResults";
 
 interface SearchBoxProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface SearchBoxProps {
 }
 
 export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
@@ -27,7 +27,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
           setResults(searchResults);
           setSelectedIndex(searchResults.length > 0 ? 0 : -1);
         } catch (error) {
-          console.error('Search failed:', error);
+          console.error("Search failed:", error);
           setResults([]);
           setSelectedIndex(-1);
         } finally {
@@ -38,7 +38,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
         setSelectedIndex(-1);
       }
     }, 300),
-    []
+    [],
   );
 
   // 处理输入变化
@@ -51,28 +51,31 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
   // 处理键盘事件
   const handleKeyDown = (e: React.KeyboardEvent) => {
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex(prev =>
-          prev < results.length - 1 ? prev + 1 : (results.length > 0 ? 0 : -1)
+        setSelectedIndex((prev) =>
+          prev < results.length - 1 ? prev + 1 : results.length > 0 ? 0 : -1,
         );
         break;
 
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
-        setSelectedIndex(prev =>
-          prev > 0 ? prev - 1 : (results.length > 0 ? results.length - 1 : -1)
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : results.length > 0 ? results.length - 1 : -1,
         );
         break;
 
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < results.length) {
-          handleSelectResult(results[selectedIndex], selectedIndex);
+          const result = results[selectedIndex];
+          if (result) {
+            handleSelectResult(result, selectedIndex);
+          }
         }
         break;
 
-      case 'Escape':
+      case "Escape":
         e.preventDefault();
         onClose();
         break;
@@ -86,10 +89,10 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
       if (success) {
         onClose();
       } else {
-        console.warn('Failed to navigate to field:', result.field.id);
+        console.warn("Failed to navigate to field:", result.field.id);
       }
     } catch (error) {
-      console.error('Error selecting search result:', error);
+      console.error("Error selecting search result:", error);
     }
   };
 
@@ -99,11 +102,17 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
   };
 
   // 处理点击外部关闭
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-      onClose();
-    }
-  }, [onClose]);
+  const handleClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
   // 自动聚焦输入框
   useEffect(() => {
@@ -115,9 +124,9 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
   // 绑定点击外部事件
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
       return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener("mousedown", handleClickOutside);
       };
     }
   }, [isOpen, handleClickOutside]);
@@ -126,7 +135,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl/Cmd + K 打开搜索
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         if (!isOpen) {
           // 这里需要父组件来打开搜索框
@@ -136,9 +145,9 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -181,7 +190,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
             <button
               className="search-clear"
               onClick={() => {
-                setQuery('');
+                setQuery("");
                 setResults([]);
                 setSelectedIndex(-1);
                 inputRef.current?.focus();
@@ -211,9 +220,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
         <div className="search-content">
           {isSearching ? (
             <div className="search-loading">
-              <div className="text-center py-4 text-gray-500">
-                搜索中...
-              </div>
+              <div className="text-center py-4 text-gray-500">搜索中...</div>
             </div>
           ) : (
             <SearchResults
@@ -238,7 +245,11 @@ export const SearchBox: React.FC<SearchBoxProps> = ({ isOpen, onClose }) => {
 };
 
 // 用于动态创建搜索框的辅助函数
-export function createSearchBox(): { open: () => void; close: () => void; destroy: () => void } {
+export function createSearchBox(): {
+  open: () => void;
+  close: () => void;
+  destroy: () => void;
+} {
   let container: HTMLDivElement | null = null;
   let root: any = null;
   let isOpen = false;
@@ -247,8 +258,8 @@ export function createSearchBox(): { open: () => void; close: () => void; destro
     if (isOpen) return;
 
     if (!container) {
-      container = document.createElement('div');
-      container.id = 'gilbling-search-box';
+      container = document.createElement("div");
+      container.id = "gilbling-search-box";
       document.body.appendChild(container);
       root = createRoot(container);
     }
