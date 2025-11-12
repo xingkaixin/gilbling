@@ -3,6 +3,10 @@ import { ExportButton } from "./components/ExportButton";
 import { SearchButton } from "./components/SearchButton";
 import { createSearchBox } from "./components/SearchBox";
 import { searchManager } from "./utils/search";
+import {
+  getFieldColorConfig,
+  type FieldColorConfig,
+} from "../storage/config";
 
 const ERROR_CONFIG = {
   logToConsole: true,
@@ -59,6 +63,9 @@ const FIELD_TYPE_COLORS: Record<keyof typeof FIELD_TYPE_MAP, string> = {
   binary: "#800080",
   boolean: "#DC143C",
 };
+
+// 全局配置状态
+let fieldColorConfig: FieldColorConfig | null = null;
 
 const TABLE_HEADERS = [
   "序号",
@@ -589,7 +596,8 @@ function applyFieldStyling(
     });
 
     const category = getFieldTypeCategory(fieldType);
-    if (category) {
+    // 只有在配置开启时才应用颜色（业务主键样式不受影响）
+    if (fieldColorConfig?.enabled && category) {
       const color = FIELD_TYPE_COLORS[category];
       cells.forEach((cell) => {
         cell.style.color = color;
@@ -792,10 +800,35 @@ function attachObserver() {
   }
 }
 
-function init() {
-  enhanceTable();
-  attachObserver();
-  window.debugEnhance = enhanceTable;
+async function init() {
+  try {
+    // 初始化配置
+    fieldColorConfig = await getFieldColorConfig();
+
+    // 监听配置变更
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'local' && changes.fieldColorConfig) {
+        const newConfig = changes.fieldColorConfig.newValue;
+        if (newConfig) {
+          fieldColorConfig = newConfig;
+          // 重新应用样式
+          enhanceTable();
+          console.log('[Gilbling] 字段着色配置已更新:', newConfig.enabled ? '已开启' : '已关闭');
+        }
+      }
+    });
+
+    enhanceTable();
+    attachObserver();
+    window.debugEnhance = enhanceTable;
+  } catch (error) {
+    // 错误处理：如果读取配置失败，使用默认值并继续
+    fieldColorConfig = { enabled: true };
+    console.warn('[Gilbling] 配置初始化失败，使用默认值:', error);
+    enhanceTable();
+    attachObserver();
+    window.debugEnhance = enhanceTable;
+  }
 }
 
 export function initEnhancement() {

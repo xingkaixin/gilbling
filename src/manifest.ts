@@ -3,9 +3,9 @@ import { defineManifest } from "@crxjs/vite-plugin";
 export default defineManifest({
   manifest_version: 3,
   name: "聚美美",
-  version: "1.2.0",
+  version: "1.3.0",
   description: "美化聚源数据字典",
-  permissions: ["activeTab"],
+  permissions: ["activeTab", "storage"],
   icons: {
     16: "icons/icon16.png",
     32: "icons/icon32.png",
@@ -18,6 +18,7 @@ export default defineManifest({
       32: "icons/icon32.png",
       48: "icons/icon48.png",
     },
+    default_popup: "src/popup/index.html",
   },
   content_scripts: [
     {
@@ -26,4 +27,5 @@ export default defineManifest({
       run_at: "document_idle",
     },
   ],
+  options_page: "src/options/index.html",
 });
