@@ -27,5 +27,4 @@ export default defineManifest({
       run_at: "document_idle",
     },
   ],
-  options_page: "src/options/index.html",
 });

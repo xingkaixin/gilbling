@@ -344,54 +344,50 @@ function formatAsTsv(data: string[][]): string {
   }
 }
 
-function copyToClipboard(text: string) {
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      window.alert("表格数据已复制到剪贴板，可直接粘贴到Excel");
-    })
-    .catch(() => {
-      window.alert(`复制失败，请手动复制以下内容：\n\n${text}`);
-      logError(
-        "剪贴板复制失败",
-        new Error("Clipboard permission denied or text too large"),
-      );
-    });
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (error) {
+    logError(
+      "剪贴板复制失败",
+      new Error("Clipboard permission denied or text too large"),
+    );
+    return false;
+  }
 }
 
-function copyMarkdownToClipboard(markdown: string) {
-  navigator.clipboard
-    .writeText(markdown)
-    .then(() => {
-      window.alert("Markdown 已复制到剪贴板，可直接粘贴到文档");
-    })
-    .catch(() => {
-      window.alert(`复制 Markdown 失败，请手动复制以下内容：\n\n${markdown}`);
-      logError(
-        "复制 Markdown 失败",
-        new Error("Clipboard permission denied or text too large"),
-      );
-    });
+async function copyMarkdownToClipboard(markdown: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(markdown);
+    return true;
+  } catch (error) {
+    logError(
+      "复制 Markdown 失败",
+      new Error("Clipboard permission denied or text too large"),
+    );
+    return false;
+  }
 }
 
-function exportTableToClipboard() {
+async function exportTableToClipboard(): Promise<boolean> {
   try {
     const data = extractTableData();
     if (!data) {
-      window.alert("没有找到表格数据");
       logError("导出表格失败", new Error("No table data found"));
-      return;
+      return false;
     }
 
     const tsvData = formatAsTsv(data);
     if (!tsvData) {
       logError("导出表格失败", new Error("TSV formatting failed"));
-      return;
+      return false;
     }
 
-    copyToClipboard(tsvData);
+    return await copyToClipboard(tsvData);
   } catch (error) {
     logError("导出表格过程中发生未知错误", error);
+    return false;
   }
 }
 
@@ -483,13 +479,12 @@ function extractPageDescription(): string {
   return normalized;
 }
 
-function copyPageAsMarkdown() {
+async function copyPageAsMarkdown(): Promise<boolean> {
   try {
     const data = extractTableData();
     if (!data) {
-      window.alert("没有找到表格数据");
       logError("复制页面为Markdown失败", new Error("No table data found"));
-      return;
+      return false;
     }
 
     const meta = extractTableMeta();
@@ -551,9 +546,10 @@ function copyPageAsMarkdown() {
 
     lines.push(`> 生成时间：${new Date().toLocaleString()}`);
 
-    copyMarkdownToClipboard(lines.join("\n"));
+    return await copyMarkdownToClipboard(lines.join("\n"));
   } catch (error) {
     logError("复制页面为Markdown失败", error);
+    return false;
   }
 }
 

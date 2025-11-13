@@ -1,8 +1,13 @@
-import { type FC } from "react";
+import { type FC, useState, type MouseEvent } from "react";
 
 type ExportButtonProps = {
-  onExport: () => void;
-  onCopyMarkdown: () => void;
+  onExport: () => Promise<boolean>;
+  onCopyMarkdown: () => Promise<boolean>;
+};
+
+type ButtonState = {
+  isSuccess: boolean;
+  text: string;
 };
 
 export const ExportButton: FC<ExportButtonProps> = ({
@@ -11,23 +16,56 @@ export const ExportButton: FC<ExportButtonProps> = ({
 }) => {
   const buttonClass = "gilbling-btn";
 
+  const [exportBtn, setExportBtn] = useState<ButtonState>({
+    isSuccess: false,
+    text: "导出表格为TSV",
+  });
+
+  const [markdownBtn, setMarkdownBtn] = useState<ButtonState>({
+    isSuccess: false,
+    text: "导出页面为Markdown",
+  });
+
+  const handleButtonClick = async (
+    event: MouseEvent<HTMLButtonElement>,
+    callback: () => Promise<boolean>,
+    setState: React.Dispatch<React.SetStateAction<ButtonState>>,
+  ) => {
+    const originalText = event.currentTarget.textContent || "";
+    const success = await callback();
+
+    if (success) {
+      setState({
+        isSuccess: true,
+        text: "✓ 已复制",
+      });
+
+      setTimeout(() => {
+        setState({
+          isSuccess: false,
+          text: originalText,
+        });
+      }, 2000);
+    }
+  };
+
   return (
     <div className="gilbling-button-group">
       <button
         id="table-export-btn"
         type="button"
         className={buttonClass}
-        onClick={onExport}
+        onClick={(e) => handleButtonClick(e, onExport, setExportBtn)}
       >
-        导出表格
+        {exportBtn.text}
       </button>
       <button
         id="table-markdown-btn"
         type="button"
         className={buttonClass}
-        onClick={onCopyMarkdown}
+        onClick={(e) => handleButtonClick(e, onCopyMarkdown, setMarkdownBtn)}
       >
-        导出页面为 Markdown
+        {markdownBtn.text}
       </button>
     </div>
   );
