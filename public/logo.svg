@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <!-- 明亮的渐变定义 -->
+    <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+
+    <!-- 简单发光效果 -->
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 明亮白色背景 -->
+  <rect width="256" height="256" rx="48" fill="#ffffff"/>
+
+  <!-- 主体：彩色方块组（体现字段着色） -->
+  <g transform="translate(128, 128)" filter="url(#softGlow)">
+    <!-- 中心方块 -->
+    <rect x="-32" y="-32" width="64" height="64" rx="12" fill="url(#shineGradient)" opacity="0.9"/>
+
+    <!-- 光环 -->
+    <circle cx="0" cy="0" r="48" fill="none" stroke="url(#accentGradient)" stroke-width="2" opacity="0.4"/>
+    <circle cx="0" cy="0" r="44" fill="none" stroke="url(#shineGradient)" stroke-width="2" opacity="0.3"/>
+  </g>
+
+  <!-- 四角的小彩色方块（体现bling感） -->
+  <g opacity="0.8" filter="url(#softGlow)">
+    <!-- 左上角 -->
+    <rect x="40" y="40" width="24" height="24" rx="4" fill="#ef4444"/>
+
+    <!-- 右上角 -->
+    <rect x="192" y="40" width="24" height="24" rx="4" fill="#0ea5e9"/>
+
+    <!-- 左下角 -->
+    <rect x="40" y="192" width="24" height="24" rx="4" fill="#10b981"/>
+
+    <!-- 右下角 -->
+    <rect x="192" y="192" width="24" height="24" rx="4" fill="#f59e0b"/>
+  </g>
+
+  <!-- 中心闪烁的小星星 -->
+  <g transform="translate(128, 128)" opacity="0.9">
+    <path d="M 0,-12 L 3,-3 L 12,0 L 3,3 L 0,12 L -3,3 L -12,0 L -3,-3 Z" fill="#ffffff" filter="url(#softGlow)"/>
+  </g>
+
+  <!-- 简单装饰性文字 -->
+  <g transform="translate(128, 228)" opacity="0.2">
+    <text x="0" y="0" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#ec4899">GILBLING</text>
+  </g>
+</svg>
