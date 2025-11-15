@@ -2,8 +2,12 @@
  * 字段着色配置存储
  */
 
+// 字段类型定义
+export type FieldType = 'numeric' | 'string' | 'datetime' | 'binary' | 'boolean'
+
 export interface FieldColorConfig {
   enabled: boolean
+  customColors?: Partial<Record<FieldType, string>>
 }
 
 const STORAGE_KEY = 'fieldColorConfig'

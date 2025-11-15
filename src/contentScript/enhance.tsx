@@ -6,6 +6,7 @@ import { searchManager } from "./utils/search";
 import {
   getFieldColorConfig,
   type FieldColorConfig,
+  type FieldType,
 } from "../storage/config";
 
 const ERROR_CONFIG = {
@@ -572,6 +573,14 @@ function getFieldTypeCategory(fieldType: string): FieldCategory | null {
   }
 }
 
+function getFieldColor(category: FieldCategory): string {
+  const customColors = fieldColorConfig?.customColors;
+  if (customColors && customColors[category]) {
+    return customColors[category];
+  }
+  return FIELD_TYPE_COLORS[category];
+}
+
 function applyFieldStyling(
   row: TableRow,
   fieldType: string,
@@ -594,7 +603,7 @@ function applyFieldStyling(
     const category = getFieldTypeCategory(fieldType);
     // 只有在配置开启时才应用颜色（业务主键样式不受影响）
     if (fieldColorConfig?.enabled && category) {
-      const color = FIELD_TYPE_COLORS[category];
+      const color = getFieldColor(category);
       cells.forEach((cell) => {
         cell.style.color = color;
       });

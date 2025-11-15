@@ -4,6 +4,7 @@
 
 ### 特性
 - 内容脚本使用 React/TypeScript 重写，保持字段类型配色、业务主键高亮和导出按钮等核心功能。
+- **字段类型着色自定义**：支持自定义5种字段类型的颜色（数值、字符串、日期时间、二进制、布尔类型），提供实时预览与一键恢复默认。
 - TailwindCSS 提供 hover 与配色增强，配合 Vite 构建输出。
 - Bun + Vite 构建生成 `dist/`，可直接加载为解压扩展。
 
@@ -37,9 +38,13 @@ bun run typecheck
 src/
   contentScript/
     components/ExportButton.tsx    导出按钮组件
-    enhance.tsx                    内容脚本主逻辑
+    enhance.tsx                    内容脚本主逻辑（字段着色、业务主键标识）
     index.tsx                      内容脚本入口
     index.css                      Tailwind 样式入口
+  popup/
+    index.tsx                      Popup配置界面（字段着色开关、自定义颜色）
+  storage/
+    config.ts                      配置存储逻辑（字段着色配置）
   manifest.ts                      CRXJS manifest 定义
 ```
 
