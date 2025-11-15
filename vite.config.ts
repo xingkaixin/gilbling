@@ -8,5 +8,20 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true
+  },
+  server: {
+    port: 5173,
+    host: 'localhost',
+    strictPort: true,
+    hmr: {
+      host: 'localhost',
+      protocol: 'ws',
+    },
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
   }
 });

@@ -19,7 +19,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
       title={`搜索字段 (${shortcut})`}
     >
       <svg
-        className="search-button-icon"
+        className="gilbling-btn-icon"
         width="16"
         height="16"
         fill="none"
@@ -33,7 +33,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
           d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
         />
       </svg>
-      <span className="search-button-text">搜索</span>
+      <span className="gilbling-btn-text">搜索</span>
       <kbd className="search-shortcut">{shortcut}</kbd>
     </button>
   );

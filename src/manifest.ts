@@ -3,7 +3,7 @@ import { defineManifest } from "@crxjs/vite-plugin";
 export default defineManifest({
   manifest_version: 3,
   name: "聚美美",
-  version: "1.3.0",
+  version: "1.4.0",
   description: "美化聚源数据字典",
   permissions: ["activeTab", "storage"],
   icons: {
