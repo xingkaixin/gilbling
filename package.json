@@ -6,7 +6,8 @@
     "dev": "bunx vite",
     "build": "bunx vite build",
     "preview": "bunx vite preview",
-    "typecheck": "bunx tsc --noEmit"
+    "typecheck": "bunx tsc --noEmit",
+    "icons": "bun run scripts/generate-icons.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -19,11 +20,12 @@
     "@types/chrome": "^0.0.261",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.13",
     "typescript": "~5.6.3",
-    "vite": "^5.4.8",
-    "@vitejs/plugin-react": "^4.3.1"
+    "vite": "^5.4.8"
   }
 }

@@ -1,61 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<svg
+    width="512"
+    height="512"
+    viewBox="0 0 256 256"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- 背景：纯白 -->
+  <rect width="256" height="256" rx="60" fill="#FFFFFF" />
+
+  <!-- G 的主体：使用了稍深的科技蓝 (Sky-600)，在白色背景上更清晰 -->
+  <path
+        d="M190 76C174.4 59.2 152.4 48 128 48C83.8172 48 48 83.8172 48 128C48 172.183 83.8172 208 128 208C163.2 208 193.2 185.2 203.6 154"
+        stroke="#0284C7"
+        stroke-width="36"
+        stroke-linecap="round"
+    />
+
+  <!-- G 的横杠：渐变色加深 (Indigo-500 -> Fuchsia-500)，增加质感 -->
+  <rect
+        x="118"
+        y="110"
+        width="94"
+        height="36"
+        rx="18"
+        fill="url(#bling_gradient_light)"
+    />
+
+  <!-- 装饰星号：使用了鲜艳的粉色 (Pink-500) -->
+  <path
+        d="M202 48L208 64L224 70L208 76L202 92L196 76L180 70L196 64L202 48Z"
+        fill="#EC4899"
+    />
+
+  <!-- 渐变定义 -->
   <defs>
-    <!-- 明亮的渐变定义 -->
-    <linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f59e0b"/>
-      <stop offset="100%" stop-color="#ec4899"/>
+    <linearGradient
+            id="bling_gradient_light"
+            x1="118"
+            y1="128"
+            x2="212"
+            y2="128"
+            gradientUnits="userSpaceOnUse"
+        >
+      <stop stop-color="#6366F1" />
+      <stop offset="1" stop-color="#D946EF" />
     </linearGradient>
-
-    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0ea5e9"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
-    </linearGradient>
-
-    <!-- 简单发光效果 -->
-    <filter id="softGlow">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
-
-  <!-- 明亮白色背景 -->
-  <rect width="256" height="256" rx="48" fill="#ffffff"/>
-
-  <!-- 主体：彩色方块组（体现字段着色） -->
-  <g transform="translate(128, 128)" filter="url(#softGlow)">
-    <!-- 中心方块 -->
-    <rect x="-32" y="-32" width="64" height="64" rx="12" fill="url(#shineGradient)" opacity="0.9"/>
-
-    <!-- 光环 -->
-    <circle cx="0" cy="0" r="48" fill="none" stroke="url(#accentGradient)" stroke-width="2" opacity="0.4"/>
-    <circle cx="0" cy="0" r="44" fill="none" stroke="url(#shineGradient)" stroke-width="2" opacity="0.3"/>
-  </g>
-
-  <!-- 四角的小彩色方块（体现bling感） -->
-  <g opacity="0.8" filter="url(#softGlow)">
-    <!-- 左上角 -->
-    <rect x="40" y="40" width="24" height="24" rx="4" fill="#ef4444"/>
-
-    <!-- 右上角 -->
-    <rect x="192" y="40" width="24" height="24" rx="4" fill="#0ea5e9"/>
-
-    <!-- 左下角 -->
-    <rect x="40" y="192" width="24" height="24" rx="4" fill="#10b981"/>
-
-    <!-- 右下角 -->
-    <rect x="192" y="192" width="24" height="24" rx="4" fill="#f59e0b"/>
-  </g>
-
-  <!-- 中心闪烁的小星星 -->
-  <g transform="translate(128, 128)" opacity="0.9">
-    <path d="M 0,-12 L 3,-3 L 12,0 L 3,3 L 0,12 L -3,3 L -12,0 L -3,-3 Z" fill="#ffffff" filter="url(#softGlow)"/>
-  </g>
-
-  <!-- 简单装饰性文字 -->
-  <g transform="translate(128, 228)" opacity="0.2">
-    <text x="0" y="0" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#ec4899">GILBLING</text>
-  </g>
 </svg>
