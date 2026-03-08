@@ -5,7 +5,8 @@ export default defineManifest({
   name: "聚美美",
   version: "1.5.0",
   description: "美化聚源数据字典",
-  permissions: ["activeTab", "storage"],
+  permissions: ["activeTab", "storage", "declarativeNetRequest"],
+  host_permissions: ["https://dd.gildata.com/*"],
   icons: {
     16: "icons/icon16.png",
     32: "icons/icon32.png",
@@ -19,6 +20,10 @@ export default defineManifest({
       48: "icons/icon48.png",
     },
     default_popup: "src/popup/index.html",
+  },
+  background: {
+    service_worker: "src/background/index.ts",
+    type: "module",
   },
   content_scripts: [
     {

@@ -6,6 +6,15 @@ import {
   type FieldColorConfig,
   type FieldType,
 } from "../storage/config";
+import {
+  getRequestBlockConfig,
+  setRequestBlockConfig,
+  type RequestBlockConfig,
+} from "../storage/requestBlock";
+import {
+  SYNC_REQUEST_BLOCKING_MESSAGE,
+  type SyncRequestBlockingMessage,
+} from "../requestBlocking";
 
 // 默认颜色映射（与contentScript保持一致）
 const DEFAULT_FIELD_COLORS: Record<FieldType, string> = {
@@ -24,11 +33,42 @@ const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   boolean: "布尔类型",
 };
 
+function syncRequestBlocking(enabled: boolean): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const message: SyncRequestBlockingMessage = {
+      type: SYNC_REQUEST_BLOCKING_MESSAGE,
+      enabled,
+    };
+
+    chrome.runtime.sendMessage(
+      message,
+      (response?: { success: boolean; error?: string }) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+
+        if (!response?.success) {
+          reject(new Error(response?.error || "同步请求拦截规则失败"));
+          return;
+        }
+
+        resolve();
+      },
+    );
+  });
+}
+
 const Popup: React.FC = () => {
   const [config, setConfig] = useState<FieldColorConfig | null>(null);
+  const [requestBlockConfig, setRequestBlockState] =
+    useState<RequestBlockConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "error";
+    text: string;
+  } | null>(null);
   const [showCustomColors, setShowCustomColors] = useState(false);
   const [customColors, setCustomColors] = useState<Record<FieldType, string>>(
     DEFAULT_FIELD_COLORS,
@@ -209,6 +249,12 @@ const Popup: React.FC = () => {
     fontWeight: 500,
   };
 
+  const errorStyle: React.CSSProperties = {
+    ...savingStyle,
+    color: "#dc2626",
+    fontWeight: 500,
+  };
+
   // 自定义颜色相关样式
   const customColorsContainerStyle: React.CSSProperties = {
     marginTop: "16px",
@@ -309,10 +355,10 @@ const Popup: React.FC = () => {
 
   // 加载配置
   useEffect(() => {
-    getFieldColorConfig()
-      .then((cfg) => {
+    Promise.all([getFieldColorConfig(), getRequestBlockConfig()])
+      .then(([cfg, requestCfg]) => {
         setConfig(cfg);
-        // 初始化自定义颜色（优先使用已保存的配置，否则使用默认值）
+        setRequestBlockState(requestCfg);
         const savedColors: Record<FieldType, string> = { ...DEFAULT_FIELD_COLORS };
         if (cfg.customColors) {
           Object.entries(cfg.customColors).forEach(([type, color]) => {
@@ -327,6 +373,7 @@ const Popup: React.FC = () => {
       .catch((error) => {
         console.error("加载配置失败:", error);
         setConfig({ enabled: true });
+        setRequestBlockState({ blockImageStatusRequest: false });
         setCustomColors(DEFAULT_FIELD_COLORS);
         setLoading(false);
       });
@@ -339,22 +386,71 @@ const Popup: React.FC = () => {
     const newConfig = { ...config, enabled: checked };
     setConfig(newConfig);
     setSaving(true);
-    setSaveSuccess(false);
+    setFeedback(null);
 
     try {
       await setFieldColorConfig(newConfig);
       setSaving(false);
-      setSaveSuccess(true);
+      setFeedback({ tone: "success", text: "✓ 设置已保存" });
 
       // 3秒后隐藏成功提示
       setTimeout(() => {
-        setSaveSuccess(false);
+        setFeedback((current) =>
+          current?.tone === "success" && current.text === "✓ 设置已保存"
+            ? null
+            : current,
+        );
       }, 3000);
     } catch (error) {
       console.error("保存配置失败:", error);
       setSaving(false);
+      const message =
+        error instanceof Error ? error.message : "保存字段着色配置失败";
+      setFeedback({ tone: "error", text: message });
       // 恢复原来的配置
       setConfig(config);
+    }
+  };
+
+  const handleRequestBlockToggle = async (checked: boolean) => {
+    if (!requestBlockConfig) return;
+
+    const previousConfig = requestBlockConfig;
+    const nextConfig = {
+      ...requestBlockConfig,
+      blockImageStatusRequest: checked,
+    };
+
+    setRequestBlockState(nextConfig);
+    setSaving(true);
+    setFeedback(null);
+
+    try {
+      await setRequestBlockConfig(nextConfig);
+      await syncRequestBlocking(checked);
+      setSaving(false);
+      setFeedback({
+        tone: "success",
+        text: checked ? "✓ 已开启请求屏蔽" : "✓ 已关闭请求屏蔽",
+      });
+
+      setTimeout(() => {
+        setFeedback((current) =>
+          current?.tone === "success" &&
+          (current.text === "✓ 已开启请求屏蔽" ||
+            current.text === "✓ 已关闭请求屏蔽")
+            ? null
+            : current,
+        );
+      }, 3000);
+    } catch (error) {
+      console.error("同步请求屏蔽失败:", error);
+      setSaving(false);
+      setRequestBlockState(previousConfig);
+      const message =
+        error instanceof Error ? error.message : "同步请求屏蔽失败";
+      setFeedback({ tone: "error", text: message });
+      await setRequestBlockConfig(previousConfig);
     }
   };
 
@@ -393,22 +489,29 @@ const Popup: React.FC = () => {
     };
 
     setSaving(true);
-    setSaveSuccess(false);
+    setFeedback(null);
     setConfig(newConfig);
 
     try {
       await setFieldColorConfig(newConfig);
       setSaving(false);
-      setSaveSuccess(true);
+      setFeedback({ tone: "success", text: "✓ 设置已保存" });
       setShowCustomColors(false);
 
       // 5秒后隐藏成功提示
       setTimeout(() => {
-        setSaveSuccess(false);
+        setFeedback((current) =>
+          current?.tone === "success" && current.text === "✓ 设置已保存"
+            ? null
+            : current,
+        );
       }, 5000);
     } catch (error) {
       console.error("保存自定义颜色失败:", error);
       setSaving(false);
+      const message =
+        error instanceof Error ? error.message : "保存自定义配色失败";
+      setFeedback({ tone: "error", text: message });
       // 恢复原来的配置
       getFieldColorConfig().then((cfg) => {
         setConfig(cfg);
@@ -475,9 +578,48 @@ const Popup: React.FC = () => {
           </label>
         </div>
 
+        <div style={toggleContainerStyle}>
+          <div style={{ flex: 1, marginRight: "12px" }}>
+            <div style={toggleLabelStyle}>屏蔽图片状态接口请求</div>
+            <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
+              拦截 `GET /api/getAllImagesByStatus1`
+            </div>
+          </div>
+          <label style={toggleWrapperStyle}>
+            <input
+              type="checkbox"
+              style={toggleInputStyle}
+              checked={!!requestBlockConfig?.blockImageStatusRequest}
+              onChange={(e) => handleRequestBlockToggle(e.target.checked)}
+            />
+            <span
+              style={{
+                ...toggleSliderStyle,
+                backgroundColor: requestBlockConfig?.blockImageStatusRequest
+                  ? "#2563eb"
+                  : "#d1d5db",
+              }}
+            >
+              <span
+                style={{
+                  ...toggleSliderBeforeStyle,
+                  left: requestBlockConfig?.blockImageStatusRequest
+                    ? "26px"
+                    : "3px",
+                }}
+              ></span>
+            </span>
+          </label>
+        </div>
+
         {/* Save Status */}
         {saving && <div style={savingStyle}>保存中...</div>}
-        {saveSuccess && <div style={successStyle}>✓ 设置已保存</div>}
+        {feedback?.tone === "success" && (
+          <div style={successStyle}>{feedback.text}</div>
+        )}
+        {feedback?.tone === "error" && (
+          <div style={errorStyle}>{feedback.text}</div>
+        )}
 
         {/* Custom Colors Section */}
         <div style={customColorsContainerStyle}>
