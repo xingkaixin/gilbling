@@ -17,6 +17,14 @@ export interface SearchResult {
   relevanceScore: number;        // 相关性评分
 }
 
+declare global {
+  interface Window {
+    __gilblingGroupActions?: {
+      expandGroupForElement: (element: HTMLElement) => void;
+    };
+  }
+}
+
 class SearchManager {
   private fieldIndex: Map<string, FieldInfo[]> = new Map();
   private isIndexBuilt = false;
@@ -210,6 +218,8 @@ class SearchManager {
     }
 
     try {
+      window.__gilblingGroupActions?.expandGroupForElement(field.element);
+
       // 滚动到元素
       field.element.scrollIntoView({
         behavior: 'smooth',

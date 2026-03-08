@@ -6,7 +6,6 @@ import { searchManager } from "./utils/search";
 import {
   getFieldColorConfig,
   type FieldColorConfig,
-  type FieldType,
 } from "../storage/config";
 
 const ERROR_CONFIG = {
@@ -97,6 +96,25 @@ type TableRemark = {
 
 type FieldCategory = keyof typeof FIELD_TYPE_MAP;
 type TableRow = HTMLTableRowElement;
+type GroupInfo = {
+  id: string;
+  title: string;
+  headerRow: TableRow;
+  fieldRows: TableRow[];
+};
+
+const GROUP_NAV_ROOT_ID = "gilbling-group-nav-root";
+const GROUP_ATTRIBUTE = "data-gilbling-group-id";
+const GROUP_ROW_ATTRIBUTE = "data-gilbling-group-row";
+const GROUP_TOGGLE_CLASS = "gilbling-group-toggle";
+const GROUP_HIDDEN_CLASS = "gilbling-group-hidden";
+const SYNTHETIC_GROUP_ATTRIBUTE = "data-gilbling-synthetic-group";
+const DEFAULT_GROUP_TITLE = "未分组";
+
+const collapsedGroupIds = new Set<string>();
+let activeGroupId: string | null = null;
+let isEnhancing = false;
+let isGroupNavExpanded = false;
 
 declare global {
   interface Window {
@@ -106,6 +124,9 @@ declare global {
       open: () => void;
       close: () => void;
       destroy: () => void;
+    };
+    __gilblingGroupActions?: {
+      expandGroupForElement: (element: HTMLElement) => void;
     };
   }
 }
@@ -581,6 +602,316 @@ function getFieldColor(category: FieldCategory): string {
   return FIELD_TYPE_COLORS[category];
 }
 
+function toGroupSlug(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\u4e00-\u9fa5-_]/g, "");
+
+  return normalized || "group";
+}
+
+function getGroupHeaderCell(row: TableRow): HTMLTableCellElement | null {
+  return row.querySelector<HTMLTableCellElement>("td.column-group[colspan]");
+}
+
+function createSyntheticGroupRow(anchorRow: TableRow, title: string): TableRow {
+  const row = document.createElement("tr");
+  row.setAttribute(SYNTHETIC_GROUP_ATTRIBUTE, "true");
+
+  const cell = document.createElement("td");
+  cell.colSpan = 7;
+  cell.className = "column-group gilbling-synthetic-group";
+  cell.textContent = title;
+
+  row.appendChild(cell);
+  anchorRow.parentElement?.insertBefore(row, anchorRow);
+  return row;
+}
+
+function parseGroups(table: HTMLTableElement | null): GroupInfo[] {
+  if (!table) {
+    return [];
+  }
+
+  const rows = Array.from(
+    table.querySelectorAll<TableRow>('tr[ng-repeat="column in columns"]'),
+  );
+
+  const groups: GroupInfo[] = [];
+  let currentGroup: GroupInfo | null = null;
+  let groupIndex = 0;
+  let ungroupedRows: TableRow[] = [];
+
+  const flushUngroupedRows = () => {
+    if (ungroupedRows.length === 0) {
+      return;
+    }
+
+    const firstUngroupedRow = ungroupedRows[0];
+    if (!firstUngroupedRow) {
+      ungroupedRows = [];
+      return;
+    }
+
+    groupIndex += 1;
+    const headerRow = createSyntheticGroupRow(
+      firstUngroupedRow,
+      DEFAULT_GROUP_TITLE,
+    );
+    groups.push({
+      id: `${toGroupSlug(DEFAULT_GROUP_TITLE)}-${groupIndex}`,
+      title: DEFAULT_GROUP_TITLE,
+      headerRow,
+      fieldRows: [...ungroupedRows],
+    });
+    ungroupedRows = [];
+  };
+
+  rows.forEach((row) => {
+    const headerCell = getGroupHeaderCell(row);
+    if (headerCell) {
+      flushUngroupedRows();
+      groupIndex += 1;
+      const title = getElementText(headerCell) ?? `字段分组 ${groupIndex}`;
+      currentGroup = {
+        id: `${toGroupSlug(title)}-${groupIndex}`,
+        title,
+        headerRow: row,
+        fieldRows: [],
+      };
+      groups.push(currentGroup);
+      return;
+    }
+
+    const cells = row.querySelectorAll<HTMLTableCellElement>("td");
+    if (cells.length >= 5) {
+      if (currentGroup) {
+        currentGroup.fieldRows.push(row);
+      } else {
+        ungroupedRows.push(row);
+      }
+    }
+  });
+
+  flushUngroupedRows();
+  return groups;
+}
+
+function cleanupGroupEnhancements() {
+  document
+    .querySelectorAll<HTMLTableRowElement>(`tr[${SYNTHETIC_GROUP_ATTRIBUTE}]`)
+    .forEach((row) => {
+      row.remove();
+    });
+
+  document
+    .querySelectorAll<HTMLElement>(`[${GROUP_ATTRIBUTE}]`)
+    .forEach((element) => {
+      element.removeAttribute(GROUP_ATTRIBUTE);
+      element.removeAttribute(GROUP_ROW_ATTRIBUTE);
+      element.classList.remove(
+        "gilbling-group-header-row",
+        "gilbling-group-field-row",
+        GROUP_HIDDEN_CLASS,
+      );
+      if (element instanceof HTMLTableRowElement) {
+        element.onclick = null;
+        element.onkeydown = null;
+        element.removeAttribute("role");
+        element.removeAttribute("tabindex");
+        element.removeAttribute("aria-expanded");
+      }
+    });
+
+  document.querySelectorAll(`.${GROUP_TOGGLE_CLASS}`).forEach((toggle) => {
+    toggle.remove();
+  });
+}
+
+function setActiveGroup(groupId: string | null) {
+  activeGroupId = groupId;
+
+  document
+    .querySelectorAll<HTMLButtonElement>(".gilbling-group-nav-item")
+    .forEach((button) => {
+      const isActive = groupId !== null && button.dataset.groupId === groupId;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-current", isActive ? "true" : "false");
+    });
+}
+
+function setGroupCollapsed(group: GroupInfo, collapsed: boolean) {
+  if (collapsed) {
+    collapsedGroupIds.add(group.id);
+  } else {
+    collapsedGroupIds.delete(group.id);
+  }
+
+  group.fieldRows.forEach((row) => {
+    row.classList.toggle(GROUP_HIDDEN_CLASS, collapsed);
+  });
+
+  group.headerRow.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  group.headerRow.classList.toggle("is-collapsed", collapsed);
+}
+
+function expandGroupById(groupId: string | null) {
+  if (!groupId) {
+    return;
+  }
+
+  const headerRow = document.querySelector<TableRow>(
+    `tr[${GROUP_ATTRIBUTE}="${groupId}"].gilbling-group-header-row`,
+  );
+  if (!headerRow) {
+    return;
+  }
+
+  const fieldRows = Array.from(
+    document.querySelectorAll<TableRow>(
+      `tr[${GROUP_ATTRIBUTE}="${groupId}"].gilbling-group-field-row`,
+    ),
+  );
+
+  fieldRows.forEach((row) => {
+    row.classList.remove(GROUP_HIDDEN_CLASS);
+  });
+
+  headerRow.setAttribute("aria-expanded", "true");
+  headerRow.classList.remove("is-collapsed");
+  collapsedGroupIds.delete(groupId);
+  setActiveGroup(groupId);
+}
+
+function enhanceGroups(groups: GroupInfo[]) {
+  const validGroupIds = new Set(groups.map((group) => group.id));
+  Array.from(collapsedGroupIds).forEach((groupId) => {
+    if (!validGroupIds.has(groupId)) {
+      collapsedGroupIds.delete(groupId);
+    }
+  });
+
+  if (activeGroupId && !validGroupIds.has(activeGroupId)) {
+    activeGroupId = null;
+  }
+
+  groups.forEach((group) => {
+    group.headerRow.setAttribute(GROUP_ATTRIBUTE, group.id);
+    group.headerRow.setAttribute(GROUP_ROW_ATTRIBUTE, "header");
+    group.headerRow.classList.add("gilbling-group-header-row");
+    group.headerRow.setAttribute("role", "button");
+    group.headerRow.setAttribute("tabindex", "0");
+
+    const headerCell = getGroupHeaderCell(group.headerRow);
+    if (headerCell) {
+      const toggle = document.createElement("span");
+      toggle.className = GROUP_TOGGLE_CLASS;
+      toggle.setAttribute("aria-hidden", "true");
+      toggle.innerHTML =
+        '<svg viewBox="0 0 16 16" focusable="false"><path d="M5 3.5 9.5 8 5 12.5" /></svg>';
+      headerCell.prepend(toggle);
+    }
+
+    group.headerRow.onclick = () => {
+      const nextCollapsed = !collapsedGroupIds.has(group.id);
+      setGroupCollapsed(group, nextCollapsed);
+      setActiveGroup(group.id);
+    };
+
+    group.headerRow.onkeydown = (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        group.headerRow.click();
+      }
+    };
+
+    group.fieldRows.forEach((row) => {
+      row.setAttribute(GROUP_ATTRIBUTE, group.id);
+      row.setAttribute(GROUP_ROW_ATTRIBUTE, "field");
+      row.classList.add("gilbling-group-field-row");
+    });
+
+    setGroupCollapsed(group, collapsedGroupIds.has(group.id));
+  });
+
+  setActiveGroup(activeGroupId ?? groups[0]?.id ?? null);
+}
+
+function renderGroupNavigation(groups: GroupInfo[]) {
+  document.getElementById(GROUP_NAV_ROOT_ID)?.remove();
+
+  if (groups.length === 0 || !fieldColorConfig?.groupOutlineEnabled) {
+    return;
+  }
+
+  const container = document.createElement("aside");
+  container.id = GROUP_NAV_ROOT_ID;
+  container.className = "gilbling-group-nav";
+  container.classList.toggle("is-expanded", isGroupNavExpanded);
+
+  const panel = document.createElement("div");
+  panel.className = "gilbling-group-nav-panel";
+
+  const title = document.createElement("div");
+  title.className = "gilbling-group-nav-title";
+  title.textContent = "字段分组";
+  panel.appendChild(title);
+
+  const list = document.createElement("div");
+  list.className = "gilbling-group-nav-list";
+
+  groups.forEach((group) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "gilbling-group-nav-item";
+    button.dataset.groupId = group.id;
+    button.textContent = group.title;
+    button.onclick = () => {
+      expandGroupById(group.id);
+      group.headerRow.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setActiveGroup(group.id);
+    };
+    list.appendChild(button);
+  });
+
+  panel.appendChild(list);
+  container.appendChild(panel);
+
+  const handle = document.createElement("button");
+  handle.type = "button";
+  handle.className = "gilbling-group-nav-handle";
+  handle.textContent = "分组";
+  handle.setAttribute("aria-label", "切换字段分组导航");
+  handle.setAttribute("aria-expanded", isGroupNavExpanded ? "true" : "false");
+  handle.onclick = () => {
+    isGroupNavExpanded = !isGroupNavExpanded;
+    container.classList.toggle("is-expanded", isGroupNavExpanded);
+    handle.setAttribute("aria-expanded", isGroupNavExpanded ? "true" : "false");
+  };
+  container.appendChild(handle);
+
+  document.body.appendChild(container);
+  setActiveGroup(activeGroupId ?? groups[0]?.id ?? null);
+}
+
+function isGilblingManagedNode(node: Node): boolean {
+  if (!(node instanceof Element)) {
+    return false;
+  }
+
+  return Boolean(
+    node.closest(`#${GROUP_NAV_ROOT_ID}`) ??
+      node.closest("#gilbling-export-root") ??
+      node.closest("#gilbling-search-button-root") ??
+      node.closest(".search-overlay"),
+  );
+}
+
 function applyFieldStyling(
   row: TableRow,
   fieldType: string,
@@ -743,8 +1074,26 @@ function cleanupSearchFunctionality() {
   }
 }
 
+function expandGroupForElement(element: HTMLElement) {
+  const row = element.closest<HTMLTableRowElement>(`tr[${GROUP_ATTRIBUTE}]`);
+  const groupId = row?.getAttribute(GROUP_ATTRIBUTE) ?? null;
+  expandGroupById(groupId);
+}
+
 function enhanceTable() {
   try {
+    isEnhancing = true;
+    const table = findMainTable();
+    cleanupGroupEnhancements();
+    document.getElementById(GROUP_NAV_ROOT_ID)?.remove();
+
+    if (!table) {
+      window.__gilblingGroupActions = {
+        expandGroupForElement,
+      };
+      return;
+    }
+
     const businessKeys = extractBusinessKeys();
     addExportButton();
     addSearchButton();
@@ -752,7 +1101,7 @@ function enhanceTable() {
     // 初始化搜索功能（只在第一次调用时初始化）
     initSearchFunctionality();
 
-    document
+    table
       .querySelectorAll<TableRow>('tr[ng-repeat="column in columns"]')
       .forEach((row) => {
         const cells = row.querySelectorAll<HTMLTableCellElement>("td");
@@ -767,20 +1116,47 @@ function enhanceTable() {
           applyFieldStyling(row, typeText, columnName, businessKeys);
         }
       });
+
+    const groups = parseGroups(table);
+    enhanceGroups(groups);
+    renderGroupNavigation(groups);
+    window.__gilblingGroupActions = {
+      expandGroupForElement,
+    };
   } catch (error) {
     logError("增强表格功能失败", error);
+  } finally {
+    isEnhancing = false;
   }
 }
 
 const observer = new MutationObserver((mutations) => {
   try {
+    if (isEnhancing) {
+      return;
+    }
+
     const shouldEnhance = mutations.some((mutation) => {
-      const node = mutation.target;
-      const target = node instanceof Element ? node : null;
-      if (target?.matches('tr[ng-repeat*="column"]')) {
-        return true;
-      }
-      return Boolean(target?.querySelector('tr[ng-repeat*="column"]'));
+      const changedNodes = [
+        ...Array.from(mutation.addedNodes),
+        ...Array.from(mutation.removedNodes),
+      ];
+
+      return changedNodes.some((node) => {
+        if (isGilblingManagedNode(node)) {
+          return false;
+        }
+
+        if (!(node instanceof Element)) {
+          return false;
+        }
+
+        if (node.matches('tr[ng-repeat*="column"]')) {
+          return true;
+        }
+
+        return Boolean(node.querySelector('tr[ng-repeat*="column"]'));
+      });
     });
 
     if (shouldEnhance) {
@@ -815,7 +1191,11 @@ async function init() {
       if (namespace === 'local' && changes.fieldColorConfig) {
         const newConfig = changes.fieldColorConfig.newValue;
         if (newConfig) {
-          fieldColorConfig = newConfig;
+          fieldColorConfig = {
+            enabled: true,
+            groupOutlineEnabled: true,
+            ...newConfig,
+          };
           // 重新应用样式
           enhanceTable();
           console.log('[Gilbling] 字段着色配置已更新:', newConfig.enabled ? '已开启' : '已关闭');
@@ -828,7 +1208,7 @@ async function init() {
     window.debugEnhance = enhanceTable;
   } catch (error) {
     // 错误处理：如果读取配置失败，使用默认值并继续
-    fieldColorConfig = { enabled: true };
+    fieldColorConfig = { enabled: true, groupOutlineEnabled: true };
     console.warn('[Gilbling] 配置初始化失败，使用默认值:', error);
     enhanceTable();
     attachObserver();

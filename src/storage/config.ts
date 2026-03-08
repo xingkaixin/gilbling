@@ -7,6 +7,7 @@ export type FieldType = 'numeric' | 'string' | 'datetime' | 'binary' | 'boolean'
 
 export interface FieldColorConfig {
   enabled: boolean
+  groupOutlineEnabled: boolean
   customColors?: Partial<Record<FieldType, string>>
 }
 
@@ -14,6 +15,7 @@ const STORAGE_KEY = 'fieldColorConfig'
 
 const DEFAULT_CONFIG: FieldColorConfig = {
   enabled: true, // 默认开启
+  groupOutlineEnabled: true,
 }
 
 /**
@@ -22,7 +24,10 @@ const DEFAULT_CONFIG: FieldColorConfig = {
 export async function getFieldColorConfig(): Promise<FieldColorConfig> {
   return new Promise((resolve) => {
     chrome.storage.local.get(STORAGE_KEY, (result) => {
-      resolve(result[STORAGE_KEY] || DEFAULT_CONFIG)
+      resolve({
+        ...DEFAULT_CONFIG,
+        ...(result[STORAGE_KEY] || {}),
+      })
     })
   })
 }
