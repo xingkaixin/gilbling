@@ -1,49 +1,36 @@
-<svg
-    width="512"
-    height="512"
-    viewBox="0 0 256 256"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
->
-  <!-- 背景：纯白 -->
-  <rect width="256" height="256" rx="60" fill="#FFFFFF" />
-
-  <!-- G 的主体：使用了稍深的科技蓝 (Sky-600)，在白色背景上更清晰 -->
-  <path
-        d="M190 76C174.4 59.2 152.4 48 128 48C83.8172 48 48 83.8172 48 128C48 172.183 83.8172 208 128 208C163.2 208 193.2 185.2 203.6 154"
-        stroke="#0284C7"
-        stroke-width="36"
-        stroke-linecap="round"
-    />
-
-  <!-- G 的横杠：渐变色加深 (Indigo-500 -> Fuchsia-500)，增加质感 -->
-  <rect
-        x="118"
-        y="110"
-        width="94"
-        height="36"
-        rx="18"
-        fill="url(#bling_gradient_light)"
-    />
-
-  <!-- 装饰星号：使用了鲜艳的粉色 (Pink-500) -->
-  <path
-        d="M202 48L208 64L224 70L208 76L202 92L196 76L180 70L196 64L202 48Z"
-        fill="#EC4899"
-    />
-
-  <!-- 渐变定义 -->
+<svg width="512" height="512" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient
-            id="bling_gradient_light"
-            x1="118"
-            y1="128"
-            x2="212"
-            y2="128"
-            gradientUnits="userSpaceOnUse"
-        >
-      <stop stop-color="#6366F1" />
-      <stop offset="1" stop-color="#D946EF" />
-    </linearGradient>
+    <filter id="soft-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+
+    <pattern id="grid-pattern-light" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+    </pattern>
+
+    <linearGradient id="iridescent-1" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE" /> <stop offset="1" stop-color="#A855F7" /> </linearGradient>
+    <linearGradient id="iridescent-2" x1="256" y1="0" x2="0" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F472B6" /> <stop offset="1" stop-color="#3B82F6" /> </linearGradient>
+
+    <radialGradient id="core-aura-light" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 128) rotate(90) scale(50)">
+      <stop stop-color="#FDE047" stop-opacity="0.8"/> <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
   </defs>
+
+  <rect width="256" height="256" rx="60" fill="#FFFFFF" />
+  <rect width="256" height="256" rx="60" fill="url(#grid-pattern-light)" />
+
+  <g filter="url(#soft-shadow)" stroke-linecap="round" stroke-width="12" fill="none">
+    <path d="M128 40C80 40 40 80 40 128C40 176 80 216 128 216" stroke="url(#iridescent-1)" stroke-dasharray="180" stroke-dashoffset="20"/>
+    <path d="M128 216C176 216 216 176 216 128C216 80 176 40 128 40" stroke="url(#iridescent-2)" stroke-dasharray="180" stroke-dashoffset="20"/>
+  </g>
+
+  <circle cx="60" cy="80" r="8" fill="url(#iridescent-1)"/>
+  <circle cx="196" cy="176" r="8" fill="url(#iridescent-2)"/>
+
+  <g>
+    <circle cx="128" cy="128" r="40" fill="url(#core-aura-light)"/>
+    <path d="M128 88L140 116L168 128L140 140L128 168L116 140L88 128L116 116L128 88Z" fill="#FFFFFF" stroke="#FDE047" stroke-width="1"/>
+  </g>
 </svg>
