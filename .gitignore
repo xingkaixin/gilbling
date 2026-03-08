@@ -1,4 +1,5 @@
 .claude/
 *.zip
 dist/
+package/
 node_modules/

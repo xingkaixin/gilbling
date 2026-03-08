@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bunx vite",
     "build": "bunx vite build",
+    "package": "./scripts/build.sh",
     "preview": "bunx vite preview",
     "typecheck": "bunx tsc --noEmit",
     "icons": "bun run scripts/generate-icons.ts"

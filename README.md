@@ -21,15 +21,15 @@ bun run dev
 # 生产构建
 bun run build
 
+# 打包 zip
+bun run package
+
 # 类型检查
 bun run typecheck
-
-# 打包 zip（依赖 dist）
-./build.sh
 ```
 
 ### Chrome 加载方式
-1. 运行 `bun run build` 或 `./build.sh` 生成 `dist/`。
+1. 运行 `bun run build` 生成 `dist/`，或运行 `bun run package` 同时生成 `dist/` 和 `package/` 下的 zip 包。
 2. 打开 `chrome://extensions/`，启用开发者模式。
 3. 选择“加载已解压的扩展程序”，指向 `dist/` 目录。
 
@@ -50,5 +50,6 @@ src/
 
 ### 注意事项
 - `src/manifest.ts` 负责生成最终 manifest，无需手动编辑根目录 `manifest.json`。
-- `build.sh` 会调用 Bun/Vite 构建并输出 zip 包。
+- 正式打包入口为 `bun run package`，底层脚本位于 `./scripts/build.sh`。
+- zip 包输出到 `package/`，`dist/` 仍用于加载已解压扩展。
 - 提交前建议运行 `bun run typecheck` 与 `bun run build` 保证结果有效。
