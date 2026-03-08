@@ -69,6 +69,14 @@
     color: #0d9488;
 }
 
+.gilbling-btn-icon-success {
+    color: #10b981;
+}
+
+.gilbling-btn:hover .gilbling-btn-icon-success {
+    color: #059669;
+}
+
 /* 按钮文字 */
 .gilbling-btn-text {
     transition: color 0.3s ease;
