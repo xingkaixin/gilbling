@@ -102,6 +102,18 @@ type GroupInfo = {
   headerRow: TableRow;
   fieldRows: TableRow[];
 };
+type DirectoryItem = {
+  id: string;
+  title: string;
+  targetElement: HTMLElement;
+  kind: "page-info" | "field-group" | "slave-table" | "remarks";
+  groupId?: string;
+};
+type DirectorySection = {
+  id: string;
+  title: string;
+  items: DirectoryItem[];
+};
 
 const GROUP_NAV_ROOT_ID = "gilbling-group-nav-root";
 const GROUP_ATTRIBUTE = "data-gilbling-group-id";
@@ -110,9 +122,10 @@ const GROUP_TOGGLE_CLASS = "gilbling-group-toggle";
 const GROUP_HIDDEN_CLASS = "gilbling-group-hidden";
 const SYNTHETIC_GROUP_ATTRIBUTE = "data-gilbling-synthetic-group";
 const DEFAULT_GROUP_TITLE = "未分组";
+const DIRECTORY_PANEL_TITLE = "目录";
 
 const collapsedGroupIds = new Set<string>();
-let activeGroupId: string | null = null;
+let activeDirectoryItemId: string | null = null;
 let isEnhancing = false;
 let isGroupNavExpanded = false;
 
@@ -725,18 +738,24 @@ function cleanupGroupEnhancements() {
       }
     });
 
+  document
+    .querySelectorAll<HTMLElement>(".gilbling-group-title, .gilbling-group-cell")
+    .forEach((element) => {
+      element.classList.remove("gilbling-group-title", "gilbling-group-cell");
+    });
+
   document.querySelectorAll(`.${GROUP_TOGGLE_CLASS}`).forEach((toggle) => {
     toggle.remove();
   });
 }
 
-function setActiveGroup(groupId: string | null) {
-  activeGroupId = groupId;
+function setActiveDirectoryItem(itemId: string | null) {
+  activeDirectoryItemId = itemId;
 
   document
-    .querySelectorAll<HTMLButtonElement>(".gilbling-group-nav-item")
+    .querySelectorAll<HTMLButtonElement>(".gilbling-directory-item")
     .forEach((button) => {
-      const isActive = groupId !== null && button.dataset.groupId === groupId;
+      const isActive = itemId !== null && button.dataset.itemId === itemId;
       button.classList.toggle("is-active", isActive);
       button.setAttribute("aria-current", isActive ? "true" : "false");
     });
@@ -782,7 +801,6 @@ function expandGroupById(groupId: string | null) {
   headerRow.setAttribute("aria-expanded", "true");
   headerRow.classList.remove("is-collapsed");
   collapsedGroupIds.delete(groupId);
-  setActiveGroup(groupId);
 }
 
 function enhanceGroups(groups: GroupInfo[]) {
@@ -793,10 +811,6 @@ function enhanceGroups(groups: GroupInfo[]) {
     }
   });
 
-  if (activeGroupId && !validGroupIds.has(activeGroupId)) {
-    activeGroupId = null;
-  }
-
   groups.forEach((group) => {
     group.headerRow.setAttribute(GROUP_ATTRIBUTE, group.id);
     group.headerRow.setAttribute(GROUP_ROW_ATTRIBUTE, "header");
@@ -806,18 +820,30 @@ function enhanceGroups(groups: GroupInfo[]) {
 
     const headerCell = getGroupHeaderCell(group.headerRow);
     if (headerCell) {
+      headerCell.classList.add("gilbling-group-cell");
       const toggle = document.createElement("span");
       toggle.className = GROUP_TOGGLE_CLASS;
       toggle.setAttribute("aria-hidden", "true");
       toggle.innerHTML =
         '<svg viewBox="0 0 16 16" focusable="false"><path d="M5 3.5 9.5 8 5 12.5" /></svg>';
       headerCell.prepend(toggle);
+
+      const title = document.createElement("span");
+      title.className = "gilbling-group-title";
+      title.textContent = getElementText(headerCell) ?? group.title;
+
+      Array.from(headerCell.childNodes).forEach((node) => {
+        if (node !== toggle) {
+          headerCell.removeChild(node);
+        }
+      });
+      headerCell.append(toggle, title);
     }
 
     group.headerRow.onclick = () => {
       const nextCollapsed = !collapsedGroupIds.has(group.id);
       setGroupCollapsed(group, nextCollapsed);
-      setActiveGroup(group.id);
+      setActiveDirectoryItem(`field-${group.id}`);
     };
 
     group.headerRow.onkeydown = (event: KeyboardEvent) => {
@@ -835,14 +861,115 @@ function enhanceGroups(groups: GroupInfo[]) {
 
     setGroupCollapsed(group, collapsedGroupIds.has(group.id));
   });
-
-  setActiveGroup(activeGroupId ?? groups[0]?.id ?? null);
 }
 
-function renderGroupNavigation(groups: GroupInfo[]) {
+function findPageInfoAnchor(): HTMLElement | null {
+  return (
+    document.getElementById("table-name-title") ??
+    document.getElementById("tableHeadInfo") ??
+    findMainTable()?.parentElement ??
+    findMainTable()
+  );
+}
+
+function findSlaveTableInfo(): DirectoryItem | null {
+  const slaveTable = document.querySelector<HTMLTableElement>("table.table-slave");
+  if (!slaveTable) {
+    return null;
+  }
+
+  const titleCell =
+    slaveTable.querySelector<HTMLElement>("thead tr:first-child th[id]") ??
+    slaveTable.querySelector<HTMLElement>("thead tr:first-child th:nth-child(2)");
+
+  return {
+    id: "slave-table",
+    title: "从表",
+    targetElement: titleCell ?? slaveTable,
+    kind: "slave-table",
+  };
+}
+
+function findRemarksInfo(): DirectoryItem | null {
+  const remarksTable = document.querySelector<HTMLTableElement>("table.table-remark");
+  if (!remarksTable) {
+    return null;
+  }
+
+  const titleCell =
+    remarksTable.querySelector<HTMLElement>("thead .title") ?? remarksTable;
+
+  return {
+    id: "remarks",
+    title: "备注说明",
+    targetElement: titleCell,
+    kind: "remarks",
+  };
+}
+
+function collectDirectorySections(groups: GroupInfo[]): DirectorySection[] {
+  const sections: DirectorySection[] = [];
+  const pageInfoAnchor = findPageInfoAnchor();
+
+  if (pageInfoAnchor) {
+    sections.push({
+      id: "page-info",
+      title: "表信息",
+      items: [
+        {
+          id: "page-info",
+          title: "表信息",
+          targetElement: pageInfoAnchor,
+          kind: "page-info",
+        },
+      ],
+    });
+  }
+
+  if (groups.length > 0) {
+    sections.push({
+      id: "fields",
+      title: "字段",
+      items: groups.map((group) => ({
+        id: `field-${group.id}`,
+        title: group.title,
+        targetElement: group.headerRow,
+        kind: "field-group",
+        groupId: group.id,
+      })),
+    });
+  }
+
+  const slaveTableItem = findSlaveTableInfo();
+  if (slaveTableItem) {
+    sections.push({
+      id: "slave-table",
+      title: "从表",
+      items: [slaveTableItem],
+    });
+  }
+
+  const remarksItem = findRemarksInfo();
+  if (remarksItem) {
+    sections.push({
+      id: "remarks",
+      title: "备注说明",
+      items: [remarksItem],
+    });
+  }
+
+  return sections;
+}
+
+function renderDirectoryNavigation(groups: GroupInfo[]) {
   document.getElementById(GROUP_NAV_ROOT_ID)?.remove();
 
-  if (groups.length === 0 || !fieldColorConfig?.groupOutlineEnabled) {
+  if (!fieldColorConfig?.directoryEnabled) {
+    return;
+  }
+
+  const sections = collectDirectorySections(groups);
+  if (sections.length === 0) {
     return;
   }
 
@@ -854,39 +981,42 @@ function renderGroupNavigation(groups: GroupInfo[]) {
   const panel = document.createElement("div");
   panel.className = "gilbling-group-nav-panel";
 
-  const title = document.createElement("div");
-  title.className = "gilbling-group-nav-title";
-  title.textContent = "字段分组";
-  panel.appendChild(title);
+  sections.forEach((section) => {
+    const sectionElement = document.createElement("section");
+    sectionElement.className = "gilbling-directory-section";
 
-  const list = document.createElement("div");
-  list.className = "gilbling-group-nav-list";
+    const list = document.createElement("div");
+    list.className = "gilbling-group-nav-list";
 
-  groups.forEach((group) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "gilbling-group-nav-item";
-    button.dataset.groupId = group.id;
-    button.textContent = group.title;
-    button.onclick = () => {
-      expandGroupById(group.id);
-      group.headerRow.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      setActiveGroup(group.id);
-    };
-    list.appendChild(button);
+    section.items.forEach((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "gilbling-directory-item";
+      button.dataset.itemId = item.id;
+      button.textContent = item.title;
+      button.onclick = () => {
+        if (item.kind === "field-group") {
+          expandGroupById(item.groupId ?? null);
+        }
+        item.targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: item.kind === "page-info" ? "start" : "start",
+        });
+        setActiveDirectoryItem(item.id);
+      };
+      list.appendChild(button);
+    });
+
+    sectionElement.appendChild(list);
+    panel.appendChild(sectionElement);
   });
-
-  panel.appendChild(list);
   container.appendChild(panel);
 
   const handle = document.createElement("button");
   handle.type = "button";
   handle.className = "gilbling-group-nav-handle";
-  handle.textContent = "分组";
-  handle.setAttribute("aria-label", "切换字段分组导航");
+  handle.textContent = "目录";
+  handle.setAttribute("aria-label", "切换目录");
   handle.setAttribute("aria-expanded", isGroupNavExpanded ? "true" : "false");
   handle.onclick = () => {
     isGroupNavExpanded = !isGroupNavExpanded;
@@ -896,7 +1026,7 @@ function renderGroupNavigation(groups: GroupInfo[]) {
   container.appendChild(handle);
 
   document.body.appendChild(container);
-  setActiveGroup(activeGroupId ?? groups[0]?.id ?? null);
+  setActiveDirectoryItem(activeDirectoryItemId ?? sections[0]?.items[0]?.id ?? null);
 }
 
 function isGilblingManagedNode(node: Node): boolean {
@@ -1119,7 +1249,7 @@ function enhanceTable() {
 
     const groups = parseGroups(table);
     enhanceGroups(groups);
-    renderGroupNavigation(groups);
+    renderDirectoryNavigation(groups);
     window.__gilblingGroupActions = {
       expandGroupForElement,
     };
@@ -1191,10 +1321,16 @@ async function init() {
       if (namespace === 'local' && changes.fieldColorConfig) {
         const newConfig = changes.fieldColorConfig.newValue;
         if (newConfig) {
+          const directoryEnabled =
+            typeof newConfig.directoryEnabled === "boolean"
+              ? newConfig.directoryEnabled
+              : typeof newConfig.groupOutlineEnabled === "boolean"
+                ? newConfig.groupOutlineEnabled
+                : true;
           fieldColorConfig = {
             enabled: true,
-            groupOutlineEnabled: true,
             ...newConfig,
+            directoryEnabled,
           };
           // 重新应用样式
           enhanceTable();
@@ -1208,7 +1344,7 @@ async function init() {
     window.debugEnhance = enhanceTable;
   } catch (error) {
     // 错误处理：如果读取配置失败，使用默认值并继续
-    fieldColorConfig = { enabled: true, groupOutlineEnabled: true };
+    fieldColorConfig = { enabled: true, directoryEnabled: true };
     console.warn('[Gilbling] 配置初始化失败，使用默认值:', error);
     enhanceTable();
     attachObserver();

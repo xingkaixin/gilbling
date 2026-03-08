@@ -372,7 +372,7 @@ const Popup: React.FC = () => {
       })
       .catch((error) => {
         console.error("加载配置失败:", error);
-        setConfig({ enabled: true, groupOutlineEnabled: true });
+        setConfig({ enabled: true, directoryEnabled: true });
         setRequestBlockState({ blockImageStatusRequest: false });
         setCustomColors(DEFAULT_FIELD_COLORS);
         setLoading(false);
@@ -454,13 +454,13 @@ const Popup: React.FC = () => {
     }
   };
 
-  const handleGroupOutlineToggle = async (checked: boolean) => {
+  const handleDirectoryToggle = async (checked: boolean) => {
     if (!config) return;
 
     const previousConfig = config;
     const nextConfig: FieldColorConfig = {
       ...config,
-      groupOutlineEnabled: checked,
+      directoryEnabled: checked,
     };
 
     setConfig(nextConfig);
@@ -472,23 +472,23 @@ const Popup: React.FC = () => {
       setSaving(false);
       setFeedback({
         tone: "success",
-        text: checked ? "✓ 已开启字段分组导航" : "✓ 已关闭字段分组导航",
+        text: checked ? "✓ 已开启目录" : "✓ 已关闭目录",
       });
 
       setTimeout(() => {
         setFeedback((current) =>
           current?.tone === "success" &&
-          (current.text === "✓ 已开启字段分组导航" ||
-            current.text === "✓ 已关闭字段分组导航")
+          (current.text === "✓ 已开启目录" ||
+            current.text === "✓ 已关闭目录")
             ? null
             : current,
         );
       }, 3000);
     } catch (error) {
-      console.error("保存字段分组导航配置失败:", error);
+      console.error("保存目录配置失败:", error);
       setSaving(false);
       const message =
-        error instanceof Error ? error.message : "保存字段分组导航配置失败";
+        error instanceof Error ? error.message : "保存目录配置失败";
       setFeedback({ tone: "error", text: message });
       setConfig(previousConfig);
     }
@@ -620,22 +620,22 @@ const Popup: React.FC = () => {
 
         <div style={toggleContainerStyle}>
           <div style={{ flex: 1, marginRight: "12px" }}>
-            <div style={toggleLabelStyle}>字段分组导航</div>
+            <div style={toggleLabelStyle}>目录</div>
             <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-              控制页面右侧字段分组 outline 的显示
+              控制页面右侧目录抽屉的显示
             </div>
           </div>
           <label style={toggleWrapperStyle}>
             <input
               type="checkbox"
               style={toggleInputStyle}
-              checked={!!config?.groupOutlineEnabled}
-              onChange={(e) => handleGroupOutlineToggle(e.target.checked)}
+              checked={!!config?.directoryEnabled}
+              onChange={(e) => handleDirectoryToggle(e.target.checked)}
             />
             <span
               style={{
                 ...toggleSliderStyle,
-                backgroundColor: config?.groupOutlineEnabled
+                backgroundColor: config?.directoryEnabled
                   ? "#2563eb"
                   : "#d1d5db",
               }}
@@ -643,7 +643,7 @@ const Popup: React.FC = () => {
               <span
                 style={{
                   ...toggleSliderBeforeStyle,
-                  left: config?.groupOutlineEnabled ? "26px" : "3px",
+                  left: config?.directoryEnabled ? "26px" : "3px",
                 }}
               ></span>
             </span>

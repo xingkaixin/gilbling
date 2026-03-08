@@ -503,10 +503,9 @@
 }
 
 .gilbling-group-header-row td.column-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
+    display: table-cell;
+    width: 100%;
+    padding: 0;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(10px);
     border-top: 1px solid rgba(94, 234, 212, 0.12);
@@ -514,10 +513,6 @@
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.72),
         0 6px 18px rgba(15, 23, 42, 0.04);
-    color: #0f172a;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
     transition:
         background-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
         border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
@@ -544,6 +539,27 @@
 .gilbling-group-header-row:focus-visible td.column-group {
     outline: 2px solid rgba(14, 165, 233, 0.28);
     outline-offset: -2px;
+}
+
+.gilbling-group-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 14px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.gilbling-group-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.45;
 }
 
 .gilbling-group-toggle {
@@ -654,25 +670,21 @@
     outline: none;
 }
 
-.gilbling-group-nav-title {
-    padding: 0 4px 10px;
-    border-bottom: 1px solid rgba(94, 234, 212, 0.14);
-    color: #0f172a;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+.gilbling-directory-section + .gilbling-directory-section {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(94, 234, 212, 0.12);
 }
 
 .gilbling-group-nav-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-top: 10px;
     max-height: calc(min(56vh, 460px) - 50px);
     overflow-y: auto;
 }
 
-.gilbling-group-nav-item {
+.gilbling-directory-item {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid transparent;
@@ -690,14 +702,14 @@
         transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.gilbling-group-nav-item:hover {
+.gilbling-directory-item:hover {
     background: rgba(94, 234, 212, 0.10);
     border-color: rgba(94, 234, 212, 0.12);
     color: #0f172a;
     transform: translateX(-1px);
 }
 
-.gilbling-group-nav-item.is-active {
+.gilbling-directory-item.is-active {
     background: rgba(94, 234, 212, 0.14);
     border-color: rgba(94, 234, 212, 0.18);
     color: #0f172a;
