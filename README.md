@@ -1,5 +1,8 @@
 ## Gilbling 增强插件
 
+
+![brand](design/jumeimei-logo/jumeimei-logo-showcase.png)
+
 面向聚美美数据平台的 Chrome 扩展，提供字段高亮、业务主键标识与表格导出能力，现基于 Bun + React + Vite + TypeScript + Tailwind + CRXJS 重新构建。
 
 ### 特性

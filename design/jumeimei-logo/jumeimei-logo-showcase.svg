@@ -1,0 +1,111 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="223" y1="104" x2="1384" y2="901" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FCFEFF"/>
+      <stop offset="0.48" stop-color="#F4FBFF"/>
+      <stop offset="1" stop-color="#EDF8FB"/>
+    </linearGradient>
+    <radialGradient id="ambientA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(370 238) rotate(51.2) scale(375.118 362.942)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.88"/>
+      <stop offset="0.48" stop-color="#E5F8FF" stop-opacity="0.52"/>
+      <stop offset="1" stop-color="#E5F8FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ambientB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(708 592) rotate(90) scale(320 288)">
+      <stop stop-color="#EFFFF9" stop-opacity="0.78"/>
+      <stop offset="0.55" stop-color="#D7FFF7" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#D7FFF7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glassA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(487 359) rotate(37.4) scale(368.785 353.769)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="0.24" stop-color="#F7FDFF" stop-opacity="0.95"/>
+      <stop offset="0.58" stop-color="#CDEEFF" stop-opacity="0.82"/>
+      <stop offset="0.84" stop-color="#8EDFFF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#8EDFFF" stop-opacity="0.08"/>
+    </radialGradient>
+    <radialGradient id="glassB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(605 573) rotate(90) scale(314 284)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.97"/>
+      <stop offset="0.28" stop-color="#F8FFFD" stop-opacity="0.94"/>
+      <stop offset="0.6" stop-color="#D2FFF2" stop-opacity="0.82"/>
+      <stop offset="0.86" stop-color="#7CE8D6" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#7CE8D6" stop-opacity="0.08"/>
+    </radialGradient>
+    <radialGradient id="glassC" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(758 357) rotate(130.1) scale(331.54 311.159)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.98"/>
+      <stop offset="0.24" stop-color="#F7FCFF" stop-opacity="0.95"/>
+      <stop offset="0.58" stop-color="#D7F4FF" stop-opacity="0.82"/>
+      <stop offset="0.85" stop-color="#A8DEFF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#A8DEFF" stop-opacity="0.08"/>
+    </radialGradient>
+    <linearGradient id="outline" x1="332" y1="197" x2="849" y2="665" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="0.52" stop-color="#E9F8FF" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#CAEAF5" stop-opacity="0.42"/>
+    </linearGradient>
+    <linearGradient id="word" x1="917" y1="408" x2="1276" y2="584" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#315C71"/>
+      <stop offset="0.58" stop-color="#4C8196"/>
+      <stop offset="1" stop-color="#75ACB0"/>
+    </linearGradient>
+    <linearGradient id="subword" x1="918" y1="537" x2="1218" y2="537" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6A9CA8"/>
+      <stop offset="1" stop-color="#8CB6BD"/>
+    </linearGradient>
+    <filter id="blur" x="80" y="36" width="820" height="796" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="44"/>
+    </filter>
+    <filter id="shadow" x="215" y="119" width="700" height="602" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="24"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.47451 0 0 0 0 0.815686 0 0 0 0 0.87451 0 0 0 0.19 0"/>
+      <feBlend in2="SourceGraphic" result="shape"/>
+    </filter>
+    <filter id="spark" x="576" y="228" width="140" height="139" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" rx="48" fill="url(#bg)"/>
+
+  <g opacity="0.94" filter="url(#blur)">
+    <circle cx="339" cy="257" r="150" fill="url(#ambientA)"/>
+    <circle cx="746" cy="613" r="132" fill="url(#ambientB)"/>
+    <circle cx="789" cy="247" r="112" fill="#F7FCFF"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M447 235C521 188 619 202 673 274C727 346 715 447 640 495C565 544 467 529 413 457C360 385 372 283 447 235Z" fill="url(#glassA)" stroke="url(#outline)" stroke-width="3"/>
+    <path d="M531 415C615 370 719 390 769 469C820 549 798 653 713 699C628 744 525 724 474 644C424 564 446 460 531 415Z" fill="url(#glassB)" stroke="url(#outline)" stroke-width="3"/>
+    <path d="M648 236C724 189 821 204 870 274C920 344 906 443 830 489C754 536 657 521 608 450C559 380 573 283 648 236Z" fill="url(#glassC)" stroke="url(#outline)" stroke-width="3"/>
+
+    <path d="M502 271C536 245 583 248 612 281" stroke="white" stroke-opacity="0.68" stroke-width="11" stroke-linecap="round"/>
+    <path d="M681 273C716 250 760 255 784 286" stroke="white" stroke-opacity="0.6" stroke-width="10" stroke-linecap="round"/>
+    <path d="M570 449C622 421 684 427 724 466" stroke="white" stroke-opacity="0.58" stroke-width="11" stroke-linecap="round"/>
+
+    <ellipse cx="641" cy="365" rx="27" ry="26" fill="white" fill-opacity="0.72"/>
+    <ellipse cx="641" cy="365" rx="56" ry="55" fill="white" fill-opacity="0.18"/>
+    <ellipse cx="641" cy="365" rx="91" ry="90" fill="white" fill-opacity="0.06"/>
+
+    <path d="M463 280C508 235 582 218 649 243" stroke="white" stroke-opacity="0.26" stroke-width="2"/>
+    <path d="M532 632C613 669 706 655 759 596" stroke="white" stroke-opacity="0.2" stroke-width="2"/>
+    <path d="M673 242C743 224 812 251 846 306" stroke="white" stroke-opacity="0.24" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#spark)">
+    <path d="M646 241L653 278L690 285L653 292L646 329L639 292L602 285L639 278L646 241Z" fill="white" fill-opacity="0.96"/>
+  </g>
+  <path d="M646 246L651 278L683 284L651 290L646 322L641 290L609 284L641 278L646 246Z" fill="white" fill-opacity="0.97"/>
+
+  <circle cx="281" cy="702" r="9" fill="#D7EEF4"/>
+  <circle cx="310" cy="702" r="9" fill="#E8F7FA"/>
+  <circle cx="1333" cy="301" r="9" fill="#DAF0F6"/>
+
+  <g opacity="0.86">
+    <rect x="916" y="319" width="154" height="10" rx="5" fill="#DAEFF4"/>
+    <rect x="1085" y="319" width="84" height="10" rx="5" fill="#EAF7F9"/>
+    <rect x="916" y="681" width="110" height="10" rx="5" fill="#DAEFF4"/>
+  </g>
+
+  <text x="916" y="486" fill="url(#word)" font-size="122" font-weight="700" font-family="PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, Microsoft YaHei, sans-serif" letter-spacing="2">聚美美</text>
+  <text x="918" y="553" fill="url(#subword)" font-size="32" font-weight="500" font-family="PingFang SC, Hiragino Sans GB, Noto Sans CJK SC, Microsoft YaHei, sans-serif" letter-spacing="2">让聚源字典更好用</text>
+  <text x="918" y="623" fill="#9BB9C0" font-size="20" font-weight="500" font-family="Instrument Sans, Work Sans, Arial, sans-serif" letter-spacing="8">GLASS CLUSTER IDENTITY</text>
+</svg>
