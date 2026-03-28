@@ -18,5 +18,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["entrypoints", "src", "wxt.config.ts"]
 }

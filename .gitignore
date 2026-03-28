@@ -1,5 +1,5 @@
 .claude/
 *.zip
+.wxt/
 dist/
-package/
 node_modules/

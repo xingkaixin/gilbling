@@ -11,7 +11,9 @@ const DEFAULT_CONFIG: RequestBlockConfig = {
 export async function getRequestBlockConfig(): Promise<RequestBlockConfig> {
   return new Promise((resolve) => {
     chrome.storage.local.get(STORAGE_KEY, (result) => {
-      resolve(result[STORAGE_KEY] || DEFAULT_CONFIG);
+      resolve(
+        (result[STORAGE_KEY] as RequestBlockConfig | undefined) ?? DEFAULT_CONFIG,
+      );
     });
   });
 }
@@ -25,4 +27,3 @@ export async function setRequestBlockConfig(
     });
   });
 }
-

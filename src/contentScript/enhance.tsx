@@ -1319,7 +1319,8 @@ async function init() {
     // 监听配置变更
     chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'local' && changes.fieldColorConfig) {
-        const newConfig = changes.fieldColorConfig.newValue;
+        const newConfig = changes.fieldColorConfig
+          .newValue as Partial<FieldColorConfig> | undefined;
         if (newConfig) {
           const directoryEnabled =
             typeof newConfig.directoryEnabled === "boolean"

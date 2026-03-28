@@ -25,7 +25,8 @@ const DEFAULT_CONFIG: FieldColorConfig = {
 export async function getFieldColorConfig(): Promise<FieldColorConfig> {
   return new Promise((resolve) => {
     chrome.storage.local.get(STORAGE_KEY, (result) => {
-      const storedConfig = result[STORAGE_KEY] || {}
+      const storedConfig =
+        (result[STORAGE_KEY] as Partial<FieldColorConfig> | undefined) ?? {}
       const directoryEnabled =
         typeof storedConfig.directoryEnabled === 'boolean'
           ? storedConfig.directoryEnabled

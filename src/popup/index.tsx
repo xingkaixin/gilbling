@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
 import {
   getFieldColorConfig,
   setFieldColorConfig,
@@ -764,9 +763,4 @@ const Popup: React.FC = () => {
   );
 };
 
-// 挂载 React 应用
-const container = document.getElementById("app");
-if (container) {
-  const root = createRoot(container);
-  root.render(<Popup />);
-}
+export default Popup;

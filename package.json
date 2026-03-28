@@ -1,32 +1,37 @@
 {
   "name": "gilbling",
+  "version": "1.6.0",
   "private": true,
   "type": "module",
+  "overrides": {
+    "vite": "^8.0.3"
+  },
   "scripts": {
-    "dev": "bunx vite",
-    "build": "bunx vite build",
-    "package": "./scripts/build.sh",
-    "preview": "bunx vite preview",
-    "typecheck": "bunx tsc --noEmit",
-    "icons": "bun run scripts/generate-icons.ts"
+    "dev": "wxt",
+    "build": "wxt clean && wxt build",
+    "zip": "wxt clean && wxt zip",
+    "typecheck": "tsc --noEmit",
+    "icons": "bun run scripts/generate-icons.ts",
+    "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.2.0",
-    "@tailwindcss/forms": "^0.5.9",
-    "@types/bun": "latest",
-    "@types/chrome": "^0.0.261",
-    "@types/react": "^18.3.5",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/bun": "^1.3.0",
+    "@types/chrome": "^0.1.38",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@wxt-dev/module-react": "^1.2.2",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
     "sharp": "^0.34.5",
-    "tailwindcss": "^3.4.13",
-    "typescript": "~5.6.3",
-    "vite": "^5.4.8"
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "wxt": "^0.20.20"
   }
 }
